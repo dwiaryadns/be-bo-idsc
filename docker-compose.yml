@@ -24,7 +24,7 @@ services:
     container_name: nginx
     restart: unless-stopped
     ports:
-      - "8081:80"  # Map port 8081 on the host to port 80 on the container
+      - "8888:80"  # Map port 8081 on the host to port 80 on the container
     volumes:
       - ./:/var/www
       - ./docker/nginx/conf.d:/etc/nginx/conf.d
