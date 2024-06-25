@@ -56,58 +56,12 @@ class AuthController extends Controller
             Log::error('OTP is null for email: ' . $request->email);
             return response()->json(['status' => false, 'message' => 'Failed to generate OTP'], 500);
         }
-
-        try {
-            SendOtpEmailJob::dispatch($request->email, $otp);
-            Log::info('OTP job dispatched for email: ' . $request->email);
-        } catch (\Exception $e) {
-            Log::error('Failed to dispatch OTP job: ' . $e->getMessage());
-            return response()->json(['status' => false, 'message' => 'Failed to dispatch OTP job'], 500);
-        }
-        OtpEmail::create([
-            'bisnis_owner_id' => $user->id,
-            'otp' => $otp,
-            'expired_at' => Carbon::now()->addMinutes(5)
-        ]);
         return response()->json([
             'status' => true,
+            'message' => 'Registration Successfully',
             'user' => $user,
             'register_id' => encrypt(rand(1000000000000000000, 999999999999999999)),
-            'token_type' => 'Bearer'
         ], 200);
-    }
-
-    public function storeOtp(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'otp' => 'required',
-        ]);
-        if ($validator->fails()) {
-            $errors = collect($validator->errors())->map(function ($messages) {
-                return $messages[0];
-            });
-            return response()->json(['status' => false, 'errors' => $errors], 422);
-        }
-
-        $bo = BisnisOwner::where('email', $request->email)->first();
-        if (!$bo) {
-            return response()->json(['status' => false, 'message' => 'Email not found'], 404);
-        }
-        $otp = OtpEmail::where('bisnis_owner_id', $bo->id)
-            ->where('otp', $request->otp)
-            ->where('expired_at', '>', now())
-            ->first();
-
-        if (!$otp) {
-            return response()->json(['status' => false, 'message' => 'OTP not valid or expired'], 422);
-        }
-
-        $bo->markEmailAsVerified();
-        $bo->update([
-            'is_send_email' => 1,
-        ]);
-        return response()->json(['status' => true, 'message' => 'Registrasi Successfully'], 200);
     }
 
     public function resendOtp(Request $request)
@@ -189,5 +143,70 @@ class AuthController extends Controller
         }
         $request->user()->currentAccessToken()->delete();
         return response()->json(['status' => true, 'message' => 'Logged out successfully'], 200);
+    }
+
+    public function getOtp(Request $request)
+    {
+        $url = 'https://api.fazpass.com/v1/otp/request';
+        $headers = [
+            'Authorization: Bearer ' . $request->header('Authorization'),
+            'Content-Type: application/json',
+        ];
+        $data = [
+            'email' => $request->input('email'),
+            'phone' => '',
+            'gateway_key' => env('GATEWAY_KEY', '3954aa72-856e-49eb-8b1c-f18d658ee067'),
+        ];
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $response = curl_exec($ch);
+        $error = curl_error($ch);
+
+        curl_close($ch);
+
+        if ($error) {
+            return response()->json(['error' => $error], 500);
+        }
+        Log::info($response);
+        return response()->json(json_decode($response, true));
+    }
+
+    public function storeOtp(Request $request)
+    {
+        $url = 'https://api.fazpass.com/v1/otp/verify';
+        $headers = [
+            'Authorization: Bearer ' . $request->header('Authorization'),
+            'Content-Type: application/json',
+        ];
+
+        $bo = BisnisOwner::where('email', $request->email)->first();
+        $bo->markEmailAsVerified();
+
+        $data = [
+            'otp_id' => $request->input('otp_id'),
+            'otp' => $request->otp,
+        ];
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $response = curl_exec($ch);
+        $error = curl_error($ch);
+
+        curl_close($ch);
+
+        if ($error) {
+            return response()->json(['error' => $error], 500);
+        }
+        Log::info($response);
+        return response()->json(json_decode($response, true));
     }
 }

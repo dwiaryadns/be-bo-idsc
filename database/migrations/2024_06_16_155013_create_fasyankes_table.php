@@ -12,21 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('fasyankes', function (Blueprint $table) {
-            $table->bigInteger('fasyankesId');
-            $table->string('type');
-            $table->string('sector');
-            $table->string('duration');
-            $table->string('package_plan');
+            $table->unsignedBigInteger('fasyankesId')->primary(); // Menggunakan unsignedBigInteger
             $table->foreignId('warehouse_id')->constrained()->onDelete('cascade');
             $table->foreignId('bisnis_owner_id')->constrained()->onDelete('cascade');
+            $table->string('type');
             $table->string('name');
             $table->text('address');
             $table->string('pic');
             $table->string('pic_number');
-            $table->string('email')->unique();
+            $table->string('username')->unique();
+            $table->string('email');
             $table->string('password');
-            $table->timestamp('start_date');
-            $table->timestamp('end_date');
             $table->boolean('is_active');
             $table->timestamps();
         });

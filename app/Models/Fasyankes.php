@@ -17,19 +17,18 @@ class Fasyankes extends Model
         'fasyankesId',
         'bisnis_owner_id',
         'type',
-        'sector',
-        'duration',
-        'package_plan',
         'warehouse_id',
         'name',
         'address',
         'pic',
         'pic_number',
         'email',
+        'username',
         'is_active',
         'password',
-        'start_date',
-        'end_date',
+        // 'sector',
+        // 'duration',
+        // 'package_plan',
     ];
     public function warehouse()
     {

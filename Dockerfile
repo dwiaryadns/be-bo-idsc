@@ -1,45 +1,54 @@
-# Use the official PHP image as a base
-FROM php:8.1-fpm
+# Use the specified PHP-FPM image with Alpine Linux
+FROM php:8.2.0-fpm-alpine
+
+# Install npm
+RUN apk add --update npm
+
+# Install PostgreSQL development libraries
+RUN set -ex \
+    && apk --no-cache add postgresql-dev
+
+# Install necessary libraries for PHP extensions
+RUN apk add --no-cache \
+    zlib-dev \
+    libpng-dev \
+    libzip-dev
+
+# Configure and install PHP extensions
+RUN docker-php-ext-configure zip
+RUN docker-php-ext-install \
+    gd \
+    zip \
+    pdo \
+    pdo_pgsql
+
+# Install Composer globally
+RUN curl -sS https://getcomposer.org/installer | php -- \
+    --install-dir=/usr/local/bin --filename=composer
 
 # Set working directory
-WORKDIR /var/www
+WORKDIR /var/www/
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpng-dev \
-    libjpeg62-turbo-dev \
-    libfreetype6-dev \
-    locales \
-    zip \
-    jpegoptim optipng pngquant gifsicle \
-    vim \
-    unzip \
-    git \
-    curl \
-    libzip-dev \
-    libonig-dev \
-    libicu-dev \
-    libxml2-dev
+# Copy application files
+COPY . .
 
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+# Install PHP dependencies using Composer
+RUN composer install
 
-# Install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip intl
+# Install Node.js dependencies
+RUN npm install
 
-# Install Composer
-COPY --from=composer:2.2 /usr/bin/composer /usr/bin/composer
+# Optimize the Laravel application
+RUN php artisan optimize
+RUN php artisan config:clear
+RUN php artisan route:clear
+RUN php artisan storage:link
 
-# Copy existing application directory contents
-COPY . /var/www
+# Expose port 80
+EXPOSE 80
 
-# Copy existing application directory permissions
-COPY --chown=www-data:www-data . /var/www
+# Set the volume for persistent storage
+VOLUME /var/www/storage/app/public
 
-# Expose port 9000 and start php-fpm server
-EXPOSE 9000
-
-# Set CMD instruction to run php-fpm
-CMD ["php-fpm"]
+# Run the Laravel development server
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=80"]

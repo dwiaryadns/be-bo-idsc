@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Fasyankes;
+use App\Models\SubscriptionPlan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +16,6 @@ class FasyankesController extends Controller
     {
         $bo = Auth::guard('bisnis_owner')->user();
         $fasyankes = Fasyankes::where('bisnis_owner_id', $bo->id)
-            ->where('is_active', 1)
             ->get();
 
         if (!$fasyankes) {
@@ -35,22 +35,22 @@ class FasyankesController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'type' => 'required',
-            'sector' => 'required',
-            'duration' => 'required',
+            'username' => 'required|unique:fasyankes,username',
             'package_plan' => 'required',
             'warehouse_id' => 'required',
             'name' => 'required',
             'address' => 'required',
             'pic' => 'required',
             'pic_number' => 'required|numeric',
-            'email' => 'required|email|unique:fasyankes',
+            'email' => 'required|email',
             'password' => [
                 'required', 'string', 'confirmed', 'min:8', 'regex:/[A-Z]/', 'regex:/[!@#$%^&*(),.?":{}|<>_]/', 'regex:/[0-9]/'
             ],
             'password_confirmation' => 'required',
         ], [
             'type.required' => 'Type of Fasyankes is required',
-            'sector.required' => 'Sektor Usaha is required',
+            'username.required' => 'Username is required',
+            'username.unique' => 'Username is registered',
             'package_plan.required' => 'Package Plan is required',
             'warehouse_id.required' => 'Warehouse is required',
             'name.required' => 'Name Fasyankes is required',
@@ -59,7 +59,6 @@ class FasyankesController extends Controller
             'pic_number.required' => 'PIC Phone Number is required',
             'email.required' => 'Email is required',
             'email.email' => 'Email is not valid',
-            'email.unique' => 'Email already registered',
             'password.regex' => 'Password must contain at least 1 Uppercase Word, 1 Special Character, and 1 Number',
         ]);
 
@@ -82,10 +81,8 @@ class FasyankesController extends Controller
             'fasyankesId' => $request->fasyankesId
         ], [
             'fasyankesId' => rand(100000, 999999),
+            'username' => $request->username,
             'type' => $request->type,
-            'sector' => $request->sector,
-            'duration' => $request->duration,
-            'package_plan' => $request->package_plan,
             'warehouse_id' => $request->warehouse_id,
             'name' => $request->name,
             'address' => $request->address,
@@ -93,17 +90,29 @@ class FasyankesController extends Controller
             'pic_number' => $request->pic_number,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'start_date' => Carbon::now(),
-            'end_date' => $request->duration === 'Monthly' ? Carbon::now()->addMonths(3) : Carbon::now()->addYear(),
-            'is_active' => 0,
+            'is_active' => 1,
             'bisnis_owner_id' => $bo->id,
         ]);
+
+        $subcriptionPlan = SubscriptionPlan::updateOrCreate(
+            [
+                'fasyankes_id' => $fasyankes->fasyankesId,
+            ],
+            [
+                'price' => $request->price,
+                'duration' => $request->duration,
+                'package_plan' => $request->package_plan,
+                'start_date' =>  Carbon::now(),
+                'end_date' => $request->duration === 'Monthly' ? Carbon::now()->addMonth() : Carbon::now()->addYear(),
+            ]
+        );
 
         if ($fasyankes) {
             return response()->json([
                 'status' => true,
                 'message' => 'Success Updated Fasyankes',
-                'data' => $fasyankes
+                'data' => $fasyankes,
+                'subscription' => $subcriptionPlan,
             ], 200);
         }
     }

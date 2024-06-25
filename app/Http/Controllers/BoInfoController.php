@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BisnisOwner;
 use App\Models\BoInfo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -47,7 +48,7 @@ class BoInfoController extends Controller
         Log::info('storeBoIfo called', $request->all());
 
         $validator = Validator::make($request->all(), [
-            'businessId' => 'required',
+            // 'businessId' => 'required',
             'businessEmail' => 'required|email',
             'businessType' => 'required',
             'businessName' => 'required',
@@ -80,9 +81,12 @@ class BoInfoController extends Controller
         // Log user info and request data before creating BoInfo
         Log::info('User authenticated', ['user_id' => $user->id, 'request_data' => $request->all()]);
 
+        $y = date('Y');
+        $m = date('m');
+        $countBo = BisnisOwner::whereNotNull('email_verified_at')->count();
         BoInfo::create([
             'bisnis_owner_id' => $user->id,
-            'businessId' => 'BO0000' . $request->businessId,
+            'businessId' => $y . $m . '000' . $countBo,
             'businessEmail' => $request->businessEmail,
             'businessType' => $request->businessType,
             'businessName' => $request->businessName,

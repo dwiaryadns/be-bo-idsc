@@ -1,8 +1,11 @@
 <?php
 
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\BoInfoController;
 use App\Http\Controllers\FasyankesController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\WarehouseController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -22,8 +25,14 @@ use Illuminate\Support\Facades\Route;
 Route::get('/test', [BoInfoController::class, 'sendTestEmail']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/store-otp', [AuthController::class, 'storeOtp']);
+// Route::post('/store-otp', [AuthController::class, 'storeOtp']);
 Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
+Route::post('/get-otp', [AuthController::class, 'getOtp']);
+Route::post('/store-otp', [AuthController::class, 'storeOtp']);
+
+Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail']);
+Route::get('/check/token/{token}', [ForgotPasswordController::class, 'checkToken']);
+Route::post('/password/reset', [ResetPasswordController::class, 'resetPassword']);
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -39,4 +48,6 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::get('/', [FasyankesController::class, 'getFasyankes']);
         Route::post('/store', [FasyankesController::class, 'storeFasyankes']);
     });
+    Route::post('/create-transaction', [PaymentController::class, 'createTransaction']);
 });
+Route::post('/midtrans/callback', [PaymentController::class, 'handleNotification']);
