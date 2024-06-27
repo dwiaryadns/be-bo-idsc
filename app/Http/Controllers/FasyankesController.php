@@ -116,7 +116,7 @@ class FasyankesController extends Controller
             $subscriptionPlan = SubscriptionPlan::updateOrCreate([
                 'fasyankes_id' => $fasyankes->fasyankesId,
             ], [
-                'price' => $request->price,
+                'price' => (int) str_replace('.', '', $request->price),
                 'duration' => $request->duration,
                 'package_plan' => $request->package_plan,
                 'start_date' => Carbon::now(),

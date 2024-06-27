@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreign('fasyankes_id')->references('fasyankesId')->on('fasyankes')->onDelete('cascade');
             $table->string('package_plan');
             $table->string('duration');
-            $table->bigInteger('price');
+            $table->decimal('price', 15, 2); // Adjusted for decimal values
             $table->timestamp('start_date');
             $table->timestamp('end_date');
             $table->timestamps();
