@@ -20,9 +20,9 @@ return new class extends Migration
             $table->text('address');
             $table->string('pic');
             $table->string('pic_number');
-            $table->string('username')->unique();
+            // $table->string('username')->unique();
             $table->string('email');
-            $table->string('password');
+            // $table->string('password');
             $table->boolean('is_active');
             $table->timestamps();
         });

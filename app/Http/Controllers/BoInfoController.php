@@ -24,7 +24,7 @@ class BoInfoController extends Controller
         }
 
         try {
-            $bo_info = BoInfo::where('bisnis_owner_id', $user->id)
+            $bo_info = BoInfo::with('bisnis_owner', 'bisnis_owner.legal_doc_bo')->where('bisnis_owner_id', $user->id)
                 ->first();
         } catch (\Exception $e) {
             return response()->json([
@@ -44,7 +44,6 @@ class BoInfoController extends Controller
 
     public function storeBoIfo(Request $request)
     {
-        // Add logging at the beginning of the method
         Log::info('storeBoIfo called', $request->all());
 
         $validator = Validator::make($request->all(), [

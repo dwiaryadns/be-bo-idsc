@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\BoInfoController;
 use App\Http\Controllers\FasyankesController;
+use App\Http\Controllers\LegalDocController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\WarehouseController;
 use Illuminate\Http\Request;
@@ -22,13 +23,13 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-Route::get('/test', [BoInfoController::class, 'sendTestEmail']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-// Route::post('/store-otp', [AuthController::class, 'storeOtp']);
 Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
 Route::post('/get-otp', [AuthController::class, 'getOtp']);
 Route::post('/store-otp', [AuthController::class, 'storeOtp']);
+
+Route::post('/midtrans/callback', [PaymentController::class, 'handleNotification']);
 
 Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail']);
 Route::get('/check/token/{token}', [ForgotPasswordController::class, 'checkToken']);
@@ -49,5 +50,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::post('/store', [FasyankesController::class, 'storeFasyankes']);
     });
     Route::post('/create-transaction', [PaymentController::class, 'createTransaction']);
+    Route::get('/legal-document-bo', [LegalDocController::class, 'getLegalDoc']);
+    Route::post('/legal-document-bo/upload', [LegalDocController::class, 'upload']);
+    Route::post('/legal-document-fasyankes/upload', [LegalDocController::class, 'uploadLegalFasyankes']);
 });
-Route::post('/midtrans/callback', [PaymentController::class, 'handleNotification']);

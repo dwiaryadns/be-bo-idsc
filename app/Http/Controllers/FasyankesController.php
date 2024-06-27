@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AccessFasyankes;
 use App\Models\Fasyankes;
+use App\Models\FasyankesWarehouse;
 use App\Models\SubscriptionPlan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class FasyankesController extends Controller
@@ -35,7 +39,7 @@ class FasyankesController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'type' => 'required',
-            'username' => 'required|unique:fasyankes,username',
+            'username' => 'required|unique:access_fasyankes,username',
             'package_plan' => 'required',
             'warehouse_id' => 'required',
             'name' => 'required',
@@ -77,42 +81,63 @@ class FasyankesController extends Controller
             ], 401);
         }
 
-        $fasyankes = Fasyankes::updateOrCreate([
-            'fasyankesId' => $request->fasyankesId
-        ], [
-            'fasyankesId' => rand(100000, 999999),
-            'username' => $request->username,
-            'type' => $request->type,
-            'warehouse_id' => $request->warehouse_id,
-            'name' => $request->name,
-            'address' => $request->address,
-            'pic' => $request->pic,
-            'pic_number' => $request->pic_number,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'is_active' => 1,
-            'bisnis_owner_id' => $bo->id,
-        ]);
+        DB::beginTransaction();
 
-        $subcriptionPlan = SubscriptionPlan::updateOrCreate(
-            [
+        try {
+            $fasyankes = Fasyankes::updateOrCreate([
+                'fasyankesId' => $request->fasyankesId
+            ], [
+                'fasyankesId' => $request->fasyankesId ?: rand(100000, 999999),
+                'type' => $request->type,
+                'warehouse_id' => $request->warehouse_id,
+                'name' => $request->name,
+                'address' => $request->address,
+                'pic' => $request->pic,
+                'pic_number' => $request->pic_number,
+                'email' => $request->email,
+                'is_active' => 1,
+                'bisnis_owner_id' => $bo->id,
+            ]);
+
+            $accessFasyankes = AccessFasyankes::updateOrCreate([
                 'fasyankes_id' => $fasyankes->fasyankesId,
-            ],
-            [
+            ], [
+                'username' => $request->username,
+                'password' => Hash::make($request->password),
+                'is_active' => 1,
+                'created_by' => $bo->name,
+            ]);
+
+            $fasyankesWarehouse = FasyankesWarehouse::create([
+                'fasyankes_id' => $fasyankes->fasyankesId,
+                'warehouse_id' => $request->warehouse_id
+            ]);
+
+            $subscriptionPlan = SubscriptionPlan::updateOrCreate([
+                'fasyankes_id' => $fasyankes->fasyankesId,
+            ], [
                 'price' => $request->price,
                 'duration' => $request->duration,
                 'package_plan' => $request->package_plan,
-                'start_date' =>  Carbon::now(),
+                'start_date' => Carbon::now(),
                 'end_date' => $request->duration === 'Monthly' ? Carbon::now()->addMonth() : Carbon::now()->addYear(),
-            ]
-        );
-
+            ]);
+            DB::commit();
+            Log::info('Berhasil');
+            Log::info($fasyankes);
+            Log::info($accessFasyankes);
+            Log::info($fasyankesWarehouse);
+            Log::info($subscriptionPlan);
+        } catch (\Exception $e) {
+            Log::info($e->getMessage());
+            DB::rollback();
+        }
         if ($fasyankes) {
             return response()->json([
                 'status' => true,
                 'message' => 'Success Updated Fasyankes',
                 'data' => $fasyankes,
-                'subscription' => $subcriptionPlan,
+                'subscription' => $subscriptionPlan,
             ], 200);
         }
     }

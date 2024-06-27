@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('akta')->nullable();
             $table->string('sk_kemenkumham')->nullable();
             $table->string('npwp');
-            $table->string('nib');
+            $table->string('nib')->nullable();
             $table->string('iso')->nullable();
             $table->string('status')->nullable();
             $table->timestamps();
