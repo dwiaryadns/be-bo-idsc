@@ -98,9 +98,11 @@ class LegalDocController extends Controller
         foreach ($request->file() as $key => $file) {
             Log::info('Processing file: ' . $key);
             $tempFilePath = $file->storeAs('temp', $key . '_' . $name . '_' . $str . '.' . $file->getClientOriginalExtension());
+            Log::info('tempfile : ' . $tempFilePath);
             if ($request->has('password')) {
                 $password = $request->input('password');
                 $pdf = new FpdiProtection();
+                Log::info('password : ' . $password);
 
                 $sourceFile = storage_path('app/' . $tempFilePath);
                 if (!file_exists($sourceFile)) {
