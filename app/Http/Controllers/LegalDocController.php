@@ -131,6 +131,7 @@ class LegalDocController extends Controller
                 Storage::delete($tempFilePath);
                 Storage::delete('temp/' . $protectedFilePath);
                 Log::info("$key uploaded and encrypted to: " . $uploadedFileUrls[$key]);
+                Log::info($uploadedFileUrls[$key]);
             }
         }
 
@@ -161,6 +162,7 @@ class LegalDocController extends Controller
             Log::info('Calling uploadAndEncryptFiles method');
             $uploadedFileUrls = $this->uploadAndEncryptFiles($request, $name);
 
+            Log::info($uploadedFileUrls);
             $legalDoc = LegalDocBo::create([
                 'bisnis_owner_id' => $bo->id,
                 'ktp' => $uploadedFileUrls['ktp'] ?? null,
