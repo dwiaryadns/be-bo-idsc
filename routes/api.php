@@ -29,13 +29,10 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
 Route::post('/get-otp', [AuthController::class, 'getOtp']);
 Route::post('/store-otp', [AuthController::class, 'storeOtp']);
-
 Route::post('/midtrans/callback', [PaymentController::class, 'handleNotification']);
-
 Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail']);
 Route::get('/check/token/{token}', [ForgotPasswordController::class, 'checkToken']);
 Route::post('/password/reset', [ResetPasswordController::class, 'resetPassword']);
-
 Route::post('/access-fasyankes', [AccessFasyankesController::class, 'checkAccessFasyankes']);
 Route::post('/access-fasyankes/store', [AccessFasyankesController::class, 'storeAccessFasyankes']);
 
