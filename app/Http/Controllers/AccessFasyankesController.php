@@ -63,6 +63,7 @@ class AccessFasyankesController extends Controller
         $fasyankes = $user->fasyankes;
         $data = [
             'username' => $user->username,
+            'role' => $user->role,
             'is_active' => '1',
             'created_by' => $user->created_by,
             'created_at' => $user->created_at,
