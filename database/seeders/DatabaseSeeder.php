@@ -3,8 +3,11 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\AccessFasyankes;
 use App\Models\BisnisOwner;
 use App\Models\BoInfo;
+use App\Models\Fasyankes;
+use App\Models\Warehouse;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -24,20 +27,42 @@ class DatabaseSeeder extends Seeder
         ]);
         $bo->markEmailAsVerified();
 
-        // BoInfo::create([
-        //     'bisnis_owner_id' => 1,
-        //     'businessId' => 'BO000' . rand(10000, 99999),
-        //     'businessType' => 'individual',
-        //     'businessName' => 'John Doe',
-        //     'businessEmail' => 'john.doe@example.com',
-        //     'phone' => '123-456-7890',
-        //     'mobile' => '098-765-4321',
-        //     'address' => '123 Main St, Anytown',
-        //     'province' => 'Province1',
-        //     'city' => 'City1',
-        //     'village' => 'Village',
-        //     'subdistrict' => 'Subdistrict1',
-        //     'postal_code' => '12345',
-        // ],);
+
+        $bo2 = BisnisOwner::create([
+            'name' => 'teguh',
+            'email' => 'teguh@gmail.com',
+            'email_verified_at' => now(),
+            'password' => Hash::make('password')
+        ]);
+        $bo2->markEmailAsVerified();
+
+        $warehouse = Warehouse::create([
+            'bisnis_owner_id' => 2,
+            'name' => 'Warehouse Teguh Test',
+            'address' => 'Jalan',
+            'pic' => 'Teguh',
+            'contact' => '08293492739427',
+        ]);
+        $fasyankes = Fasyankes::create([
+            'fasyankesId' => '12345678',
+            'bisnis_owner_id' => 2,
+            'type' => 'Klinik',
+            'warehouse_id' => 1,
+            'name' => 'Test Fasyankes',
+            'address' => 'Jalan',
+            'pic' => 'Teguh',
+            'pic_number' => '0893849238293',
+            'email' => 'teguh@gmail.com',
+            'is_active' => 1,
+        ]);
+
+        $accessFasyankes = AccessFasyankes::create([
+            'fasyankes_id' => '12345678',
+            'username' => 'USNTEST0001',
+            'password' => Hash::make('password123'),
+            'is_active' => 1,
+            'created_by' => 'Teguh',
+            'role' => 'admin'
+        ]);
     }
 }

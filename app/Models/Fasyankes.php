@@ -23,12 +23,7 @@ class Fasyankes extends Model
         'pic',
         'pic_number',
         'email',
-        // 'username',
         'is_active',
-        // 'password',
-        // 'sector',
-        // 'duration',
-        // 'package_plan',
     ];
     public function warehouse()
     {
