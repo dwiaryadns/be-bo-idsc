@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccessFasyankesController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -34,6 +35,9 @@ Route::post('/midtrans/callback', [PaymentController::class, 'handleNotification
 Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail']);
 Route::get('/check/token/{token}', [ForgotPasswordController::class, 'checkToken']);
 Route::post('/password/reset', [ResetPasswordController::class, 'resetPassword']);
+
+Route::post('/access-fasyankes', [AccessFasyankesController::class, 'checkAccessFasyankes']);
+Route::post('/access-fasyankes/store', [AccessFasyankesController::class, 'storeAccessFasyankes']);
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);

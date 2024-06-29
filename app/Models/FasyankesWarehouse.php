@@ -17,7 +17,7 @@ class FasyankesWarehouse extends Model
 
     public function fasyankes()
     {
-        return $this->belongsTo(Fasyankes::class);
+        return $this->belongsTo(Fasyankes::class, 'fasyankes_id', 'fasyankesId');
     }
 
     public function warehouse()

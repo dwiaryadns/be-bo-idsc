@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('password');
             $table->boolean('is_active');
             $table->string('created_by');
+            $table->string('role')->default('admin');
             $table->timestamps();
         });
     }

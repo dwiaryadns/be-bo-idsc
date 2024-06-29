@@ -47,8 +47,14 @@ class BisnisOwner extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(LegalDocBo::class);
     }
 
-    public function warehouses (){
+    public function warehouses()
+    {
         return $this->hasMany(Warehouse::class);
+    }
+
+    public function fasyankes()
+    {
+        return $this->hasMany(Fasyankes::class);
     }
 
     public function sendPasswordResetNotification($token)

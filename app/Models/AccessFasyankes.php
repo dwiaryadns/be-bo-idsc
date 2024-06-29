@@ -15,10 +15,11 @@ class AccessFasyankes extends Model
         'password',
         'is_active',
         'created_by',
+        'role'
     ];
 
     public function fasyankes()
     {
-        return $this->belongsTo(Fasyankes::class);
+        return $this->belongsTo(Fasyankes::class, 'fasyankes_id', 'fasyankesId');
     }
 }

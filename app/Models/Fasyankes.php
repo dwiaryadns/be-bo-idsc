@@ -34,6 +34,16 @@ class Fasyankes extends Model
     {
         return $this->belongsTo(Warehouse::class);
     }
+
+    public function bisnis_owner()
+    {
+        return $this->belongsTo(BisnisOwner::class);
+    }
+
+    public function access_fasyankes()
+    {
+        return $this->hasMany(AccessFasyankes::class);
+    }
     protected $casts = [
         'is_active' => 'boolean',
     ];
