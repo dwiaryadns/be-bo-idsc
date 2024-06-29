@@ -11,6 +11,7 @@ class AccessFasyankes extends Model
 
     protected $fillable = [
         'fasyankes_id',
+        'id_profile',
         'username',
         'password',
         'is_active',

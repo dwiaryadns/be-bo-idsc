@@ -64,6 +64,7 @@ class AccessFasyankesController extends Controller
         $data = [
             'username' => $user->username,
             'role' => $user->role,
+            'id_profile' => $user->id_profile,
             'is_active' => '1',
             'created_by' => $user->created_by,
             'created_at' => $user->created_at,
@@ -93,6 +94,7 @@ class AccessFasyankesController extends Controller
         $validator = Validator::make($request->all(), [
             'fasyankes_id' => 'required',
             'role' => 'required',
+            'id_profile' => 'required',
             'username' => 'required|unique:access_fasyankes,username',
             'password' => [
                 'required', 'string', 'confirmed', 'min:8', 'regex:/[A-Z]/', 'regex:/[!@#$%^&*(),.?":{}|<>_]/', 'regex:/[0-9]/'
@@ -121,6 +123,7 @@ class AccessFasyankesController extends Controller
 
         $user = AccessFasyankes::create([
             'fasyankes_id' => $request->fasyankes_id,
+            'id_profile' => $request->id_profile,
             'username' => $request->username,
             'password' => Hash::make($request->password),
             'is_active' => 1,
@@ -130,6 +133,7 @@ class AccessFasyankesController extends Controller
 
         $data = [
             'fasyankes_id' => $user->fasyankes_id,
+            'id_profile' => $user->id_profile,
             'username' => $user->username,
             'is_active' => $user->is_active,
             'created_by' => $user->created_by,

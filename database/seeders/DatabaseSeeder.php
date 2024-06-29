@@ -62,7 +62,8 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password123'),
             'is_active' => 1,
             'created_by' => 'Teguh',
-            'role' => 'admin'
+            'role' => 'admin',
+            'id_profile' => null
         ]);
     }
 }
