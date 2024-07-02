@@ -7,9 +7,10 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\BoInfoController;
 use App\Http\Controllers\FasyankesController;
 use App\Http\Controllers\LegalDocController;
+use App\Http\Controllers\MasterKfaController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\WarehouseController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -33,8 +34,16 @@ Route::post('/midtrans/callback', [PaymentController::class, 'handleNotification
 Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail']);
 Route::get('/check/token/{token}', [ForgotPasswordController::class, 'checkToken']);
 Route::post('/password/reset', [ResetPasswordController::class, 'resetPassword']);
-Route::post('/access-fasyankes', [AccessFasyankesController::class, 'checkAccessFasyankes']);
-Route::post('/access-fasyankes/store', [AccessFasyankesController::class, 'storeAccessFasyankes']);
+
+
+Route::middleware('check.token')->group(function () {
+    Route::post('/access-fasyankes', [AccessFasyankesController::class, 'checkAccessFasyankes']);
+    Route::post('/access-fasyankes/store', [AccessFasyankesController::class, 'storeAccessFasyankes']);
+
+    Route::get('/master-kfa', [MasterKfaController::class, 'index']);
+    Route::get('/master-kfa/pov', [MasterKfaController::class, 'kfa_pov']);
+    Route::get('/master-kfa/pov/poa', [MasterKfaController::class, 'kfa_poa']);
+});
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -51,7 +60,10 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::post('/store', [FasyankesController::class, 'storeFasyankes']);
     });
     Route::post('/create-transaction', [PaymentController::class, 'createTransaction']);
+    Route::post('/update-payment', [PaymentController::class, 'updateTransactionStatus']);
     Route::get('/legal-document-bo', [LegalDocController::class, 'getLegalDoc']);
     Route::post('/legal-document-bo/upload', [LegalDocController::class, 'upload']);
     Route::post('/legal-document-fasyankes/upload', [LegalDocController::class, 'uploadLegalFasyankes']);
+
+    Route::get('/subscription/{type}', [SubscriptionController::class, 'index']);
 });

@@ -22,4 +22,9 @@ class SubscriptionPlan extends Model
     {
         return $this->hasMany(Transaction::class);
     }
+
+    public function fasyankes()
+    {
+        return $this->belongsTo(Fasyankes::class, 'fasyankes_id', 'fasyankesId');
+    }
 }

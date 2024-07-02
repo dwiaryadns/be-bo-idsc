@@ -11,7 +11,7 @@ class Transaction extends Model
 
     protected $fillable = [
         'transaction_id',
-        // 'subscription_plan_id',
+        'subscription_plan_id',
         'gross_amount',
         'transaction_time',
         'order_id',

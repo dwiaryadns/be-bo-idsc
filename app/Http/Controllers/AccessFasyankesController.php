@@ -9,26 +9,17 @@ use Illuminate\Support\Facades\Validator;
 
 class AccessFasyankesController extends Controller
 {
-    public function checkToken(Request $request)
+
+    public function __construct()
     {
-        $token = 'IDsM4RtcaR32024*@>';
-        if ($request->_token != $token) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Token is Invalid'
-            ], 401);
-        }
-        return response()->json([
-            'status' => true,
-            'message' => 'Token is Valid'
-        ], 200);
+        $this->middleware('check.token');
     }
+
     public function checkAccessFasyankes(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'username' => 'required|string|max:255',
             'password' => 'required',
-            '_token' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -37,7 +28,6 @@ class AccessFasyankesController extends Controller
             });
             return response()->json(['status' => false, 'errors' => $errors], 422);
         }
-        $this->checkToken($request);
         $user = AccessFasyankes::with('fasyankes', 'fasyankes.warehouse', 'fasyankes.bisnis_owner')
             ->where('username', $request->username)
             ->first();
@@ -110,8 +100,6 @@ class AccessFasyankesController extends Controller
             });
             return response()->json(['status' => false, 'errors' => $errors], 422);
         }
-
-        $this->checkToken($request);
 
         $checkFasyankesId = AccessFasyankes::where('fasyankes_id', $request->fasyankes_id)->first();
         if (!$checkFasyankesId) {

@@ -65,5 +65,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin',
             'id_profile' => null
         ]);
+
+        $this->call(KfaSeeder::class);
     }
 }

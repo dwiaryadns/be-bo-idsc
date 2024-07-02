@@ -23,7 +23,7 @@ class PaymentController extends Controller
 
     public function createTransaction(Request $request)
     {
-        Log::info($request->amount . ' '   . (int)$request->amount . ' ' .  (float)$request->amount);
+        Log::info($request->amount . ' ' . (int)$request->amount . ' ' . (float)$request->amount);
         $params = [
             'transaction_details' => [
                 'order_id' => uniqid(),
@@ -47,13 +47,13 @@ class PaymentController extends Controller
                 "email" => $request->email,
                 "phone" => $request->pic_number,
             ],
-            'enabled_payments' => ['bank_transfer', 'gopay', 'shopeepay', 'qris'],
+            'enabled_payments' => ['bank_transfer', 'gopay', 'shopeepay', 'qris',''],
             'expiry' => [
                 'start_time' => date('Y-m-d H:i:s T', strtotime('now')),
                 'unit' => 'minutes',
                 'duration' => 60
             ],
-            'subscription_plan_id' => $request->subscription_plan_id,
+            'custom_field1' => $request->subscription_plan_id, 
         ];
 
         Log::info('Transaction Params: ', $params);
@@ -77,8 +77,12 @@ class PaymentController extends Controller
             $acquirer = $notification->acquirer ?? null;
             $fraudStatus = $notification->fraud_status ?? null;
             $expiryTime = $notification->expiry_time ?? null;
-            $vaNumber = $notification->va_numbers[0]['va_number'] ?? null;
-            $bank = $notification->va_numbers[0]['bank'] ?? null;
+
+            $urlQr = "https://api.sandbox.midtrans.com/v2/qris/" . $transaction->transaction_id . "/qr-code";
+            Log::info('URL QR WEBHOOK payment : ' . $urlQr);
+
+            $vaNumber = isset($notification->va_numbers[0]) ? $notification->va_numbers[0]->va_number : null;
+            $bank = isset($notification->va_numbers[0]) ? $notification->va_numbers[0]->bank : null;
 
             $payment = Payment::updateOrCreate([
                 'transaction_id' => $transaction->id,
@@ -88,7 +92,8 @@ class PaymentController extends Controller
                 'fraud_status' => $fraudStatus,
                 'expired_at' => $expiryTime,
                 'va_number' => $vaNumber,
-                'bank' => $bank
+                'bank' => $bank,
+                'url_qr' => $urlQr
             ]);
 
             Log::info('Payment : ' . $payment);
@@ -122,6 +127,7 @@ class PaymentController extends Controller
             $transactionTime = $notification->transaction_time;
             $transactionId = $notification->transaction_id;
             $grossAmount = $notification->gross_amount;
+            $customField1 = $notification->custom_field1;
 
             $transaction = Transaction::where('order_id', $orderId)->first();
 
@@ -134,6 +140,7 @@ class PaymentController extends Controller
             $transaction->transaction_time = $transactionTime;
             $transaction->transaction_id = $transactionId;
             $transaction->gross_amount = $grossAmount;
+            $transaction->subscription_plan_id = $customField1;
 
             if ($transactionStatus == 'capture') {
                 if ($fraudStatus == 'challenge') {
@@ -154,8 +161,8 @@ class PaymentController extends Controller
             }
             $transaction->save();
 
-            $this->handlePayment($transaction,  $notification);
-            $this->handleLogTransaction($transaction,  $notification);
+            $this->handlePayment($transaction, $notification);
+            $this->handleLogTransaction($transaction, $notification);
             Log::info(json_encode($notification, true));
             return response()->json(['message' => 'Notification processed successfully']);
         } catch (\Throwable $th) {

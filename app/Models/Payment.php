@@ -16,7 +16,8 @@ class Payment extends Model
         'fraud_status',
         'expired_at',
         'va_number',
-        'bank'
+        'bank',
+        'url_qr',
     ];
 
     protected $casts = [

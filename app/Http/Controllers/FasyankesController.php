@@ -46,7 +46,11 @@ class FasyankesController extends Controller
             'address' => 'required',
             'pic' => 'required',
             'pic_number' => 'required|numeric',
-            'email' => 'required|email',
+            'email' => [
+                'required',
+                'email',
+                'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/'
+            ],
             'password' => [
                 'required', 'string', 'confirmed', 'min:8', 'regex:/[A-Z]/', 'regex:/[!@#$%^&*(),.?":{}|<>_]/', 'regex:/[0-9]/'
             ],
@@ -61,6 +65,7 @@ class FasyankesController extends Controller
             'address.required' => 'Address is required',
             'pic.required' => 'PIC is required',
             'pic_number.required' => 'PIC Phone Number is required',
+            'pic_number.numeric' => 'PIC Phone Number field must be a number.',
             'email.required' => 'Email is required',
             'email.email' => 'Email is not valid',
             'password.regex' => 'Password must contain at least 1 Uppercase Word, 1 Special Character, and 1 Number',

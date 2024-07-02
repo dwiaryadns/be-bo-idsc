@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->string('transaction_id')->index();
-            // $table->foreignId('subscription_plan_id')->constrained()->onDelete('cascade');
+            $table->foreignId('subscription_plan_id')->constrained()->onDelete('cascade');
             $table->string('transaction_status');
             $table->string('gross_amount');
             $table->string('transaction_time');

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('bank')->nullable();
             $table->string('acquirer')->nullable();
             $table->string('fraud_status');
+            $table->string('url_qr')->nullable();
             $table->timestamp('expired_at');
             $table->timestamps();
         });
