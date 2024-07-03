@@ -113,7 +113,9 @@ class FasyankesController extends Controller
                 'created_by' => $bo->name,
             ]);
 
+            $countFasyankesWarehouse = FasyankesWarehouse::count();
             $fasyankesWarehouse = FasyankesWarehouse::create([
+                'wfid' => 'WFID' . date('Y') . date('m') . '0000' . $countFasyankesWarehouse + 1,
                 'fasyankes_id' => $fasyankes->fasyankesId,
                 'warehouse_id' => $request->warehouse_id
             ]);

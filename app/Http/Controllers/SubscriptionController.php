@@ -6,6 +6,7 @@ use App\Models\SubscriptionPlan;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class SubscriptionController extends Controller
 {
@@ -29,6 +30,7 @@ class SubscriptionController extends Controller
         $transactionStatuses = ($type == 'need-pay') ? ['pending'] : ['success', 'cancel', 'expired', 'failure', 'deny'];
 
         $transactions = Transaction::with('subscriptionPlan.fasyankes', 'payment')
+            ->orderBy('transaction_time', 'DESC')
             ->whereIn('transaction_status', $transactionStatuses)
             ->whereHas('subscriptionPlan.fasyankes', function ($q) use ($bo) {
                 $q->where('bisnis_owner_id', $bo->id);
@@ -41,7 +43,7 @@ class SubscriptionController extends Controller
                 continue;
             }
 
-            $payment_type = $transaction->payment->payment_type == 'bank_transfer' ? strtoupper($transaction->payment->bank)  : $transaction->payment->acquirer;
+            $payment_type = $transaction->payment->payment_type == 'bank_transfer' ? strtoupper($transaction->payment->bank)  : $transaction->payment->payment_type;
             $fasyankes = $transaction->subscriptionPlan->fasyankes->name;
             $plan = $transaction->subscriptionPlan->package_plan;
             $duration = $transaction->subscriptionPlan->duration === 'Monthly' ? '1 Bulan' : '1 Tahun';
@@ -53,7 +55,10 @@ class SubscriptionController extends Controller
                 'payment_type' => $payment_type,
                 'status' => $transaction->transaction_status,
                 'fasyankes' => $fasyankes,
-                'plan' => $plan . ' ' . $duration
+                'plan' => $plan . ' ' . $duration,
+                'qr_code' => $transaction->payment->url_qr,
+                'va_number' => $transaction->payment->va_number,
+                'transaction_id' => $transaction->transaction_id,
             ];
             $data[] = $data_change;
         }

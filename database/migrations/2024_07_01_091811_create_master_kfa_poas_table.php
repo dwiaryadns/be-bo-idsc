@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('master_kfa_poas', function (Blueprint $table) {
-            $table->unsignedBigInteger('kfa_poa_code')->primary();
+            $table->unsignedBigInteger('kfa_poa_code')->primary()->index();
             $table->unsignedBigInteger('kfa_pov_code');
             $table->foreign('kfa_pov_code')->references('kfa_pov_code')->on('master_kfa_povs')->onDelete('cascade');
             $table->string('kfa_poa_idsc');

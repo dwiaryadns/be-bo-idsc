@@ -10,7 +10,9 @@ class FasyankesWarehouse extends Model
     use HasFactory;
 
     protected $table = 'fasyankes_warehouse';
+    protected $primaryKey = 'wfid';
     protected $fillable = [
+        'wfid',
         'fasyankes_id',
         'warehouse_id',
     ];

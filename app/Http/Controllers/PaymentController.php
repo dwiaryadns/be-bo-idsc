@@ -47,13 +47,13 @@ class PaymentController extends Controller
                 "email" => $request->email,
                 "phone" => $request->pic_number,
             ],
-            'enabled_payments' => ['bank_transfer', 'gopay', 'shopeepay', 'qris',''],
+            'enabled_payments' => ['bank_transfer', 'gopay', 'shopeepay', 'qris', 'other_qris'],
             'expiry' => [
                 'start_time' => date('Y-m-d H:i:s T', strtotime('now')),
                 'unit' => 'minutes',
-                'duration' => 60
+                'duration' => 1440
             ],
-            'custom_field1' => $request->subscription_plan_id, 
+            'custom_field1' => $request->subscription_plan_id,
         ];
 
         Log::info('Transaction Params: ', $params);
@@ -78,9 +78,12 @@ class PaymentController extends Controller
             $fraudStatus = $notification->fraud_status ?? null;
             $expiryTime = $notification->expiry_time ?? null;
 
-            $urlQr = "https://api.sandbox.midtrans.com/v2/qris/" . $transaction->transaction_id . "/qr-code";
-            Log::info('URL QR WEBHOOK payment : ' . $urlQr);
-
+            $urlQr = null;
+            if ($acquirer == 'airpay shopee') {
+                $urlQr = "https://api.sandbox.midtrans.com/v2/qris/shopeepay/sppq_" . $transaction->transaction_id . "/qr-code";
+            } else if ($acquirer == 'gopay') {
+                $urlQr = "https://api.sandbox.midtrans.com/v2/qris/" . $transaction->transaction_id . "/qr-code";
+            }
             $vaNumber = isset($notification->va_numbers[0]) ? $notification->va_numbers[0]->va_number : null;
             $bank = isset($notification->va_numbers[0]) ? $notification->va_numbers[0]->bank : null;
 
