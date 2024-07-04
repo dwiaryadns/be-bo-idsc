@@ -1,17 +1,19 @@
 <?php
 
-use App\Http\Controllers\AccessFasyankesController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\BoInfoController;
+use App\Http\Controllers\Core\AccessFasyankesController;
+use App\Http\Controllers\Core\MasterKfaController;
+use App\Http\Controllers\Core\TransaksiController;
 use App\Http\Controllers\FasyankesController;
 use App\Http\Controllers\LegalDocController;
-use App\Http\Controllers\MasterKfaController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\WarehouseController;
 use Illuminate\Support\Facades\Route;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +45,9 @@ Route::middleware('check.token')->group(function () {
     Route::get('/master-kfa', [MasterKfaController::class, 'index']);
     Route::get('/master-kfa/pov', [MasterKfaController::class, 'kfa_pov']);
     Route::get('/master-kfa/pov/poa', [MasterKfaController::class, 'kfa_poa']);
+
+    Route::get('/master-barang', [TransaksiController::class, 'master_barang']);
+    Route::post('/decrease-stock', [TransaksiController::class, 'decreaseStock']);
 });
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {

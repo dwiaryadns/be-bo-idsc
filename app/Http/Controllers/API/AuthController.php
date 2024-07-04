@@ -10,10 +10,12 @@ use App\Models\OtpEmail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
@@ -127,12 +129,14 @@ class AuthController extends Controller
 
         $token = $user->createToken('iDsm4rtC4R3')->plainTextToken;
 
+        $cookie = cookie('token', $token, 60 * 24); // 1 day
+
         return response()->json([
             'token' => $token,
             'status' => true,
             'message' => 'Login Successfully',
             'data' => $user
-        ], 200);
+        ], 200)->withCookie($cookie);
     }
 
     public function logout(Request $request)

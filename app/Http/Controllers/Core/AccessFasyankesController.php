@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Core;
 
 use App\Models\AccessFasyankes;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -58,6 +59,7 @@ class AccessFasyankesController extends Controller
             'is_active' => '1',
             'created_by' => $user->created_by,
             'created_at' => $user->created_at,
+            'wfid' => $user->wfid($fasyankes->fasyankesId),
             'fasyankes' => [
                 'bisnis_owner' => $fasyankes->bisnis_owner,
                 'warehouse' => $fasyankes->warehouse,

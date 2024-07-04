@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Core;
 
 use App\Models\MasterKfa;
+use App\Http\Controllers\Controller;
+
 use App\Models\MasterKfaPoa;
 use App\Models\MasterKfaPov;
 use Illuminate\Http\Request;

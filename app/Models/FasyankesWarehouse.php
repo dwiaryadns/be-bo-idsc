@@ -11,6 +11,7 @@ class FasyankesWarehouse extends Model
 
     protected $table = 'fasyankes_warehouse';
     protected $primaryKey = 'wfid';
+    public $incrementing = false;
     protected $fillable = [
         'wfid',
         'fasyankes_id',
@@ -25,5 +26,20 @@ class FasyankesWarehouse extends Model
     public function warehouse()
     {
         return $this->belongsTo(Warehouse::class);
+    }
+
+    public function stock_barangs()
+    {
+        return $this->hasMany(StockBarang::class, 'fasyankes_warehouse_id', 'wfid');
+    }
+
+    public function penerimaan_barangs()
+    {
+        return $this->hasMany(PenerimaanBarang::class, 'fasyankes_warehouse_id', 'wfid');
+    }
+
+    public function pembelian_barangs()
+    {
+        return $this->hasMany(Pembelian::class, 'fasyankes_warehouse_id', 'wfid');
     }
 }

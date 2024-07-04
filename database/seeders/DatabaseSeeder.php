@@ -9,6 +9,7 @@ use App\Models\BoInfo;
 use App\Models\Fasyankes;
 use App\Models\Warehouse;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -55,6 +56,32 @@ class DatabaseSeeder extends Seeder
             'email' => 'teguh@gmail.com',
             'is_active' => 1,
         ]);
+        $fasyankes2 = Fasyankes::create([
+            'fasyankesId' => '123456789',
+            'bisnis_owner_id' => 2,
+            'type' => 'Klinik',
+            'warehouse_id' => 1,
+            'name' => 'Test Fasyankes 2',
+            'address' => 'Jalan',
+            'pic' => 'Teguh',
+            'pic_number' => '0893849238293',
+            'email' => 'arya@gmail.com',
+            'is_active' => 1,
+        ]);
+        $fasyankesWarehouses = [
+            [
+                'wfid' => 'WFID00001',
+                'fasyankes_id' => $fasyankes->fasyankesId,
+                'warehouse_id' => $warehouse->id,
+            ],
+            [
+                'wfid' => 'WFID00002',
+                'fasyankes_id' => $fasyankes2->fasyankesId,
+                'warehouse_id' => $warehouse->id,
+            ],
+        ];
+
+        DB::table('fasyankes_warehouse')->insert($fasyankesWarehouses);
 
         $accessFasyankes = AccessFasyankes::create([
             'fasyankes_id' => '12345678',
@@ -67,5 +94,14 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(KfaSeeder::class);
+        $this->call(KategoriBarangApotekSeeder::class);
+        $this->call(SuppliersSeeder::class);
+        $this->call(BarangsSeeder::class);
+        $this->call(SupplierBarangsSeeder::class);
+        $this->call(StockBarangsSeeder::class);
+        $this->call(PembelianSeeder::class);
+        $this->call(DetailPembelianSeeder::class);
+        $this->call(PenerimaanBarangSeeder::class);
+        $this->call(DetailPenerimaanBarangSeeder::class);
     }
 }
