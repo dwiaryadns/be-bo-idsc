@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Core;
 
 use App\Http\Controllers\Controller;
 use App\Models\Barang;
+use App\Models\FasyankesWarehouse;
 use App\Models\KategoriBarangApotek;
 use App\Models\StockBarang;
 use Illuminate\Http\Request;
@@ -39,6 +40,14 @@ class TransaksiController extends Controller
                 'status' => false,
                 'message' => 'WFID is required'
             ], 400);
+        }
+
+        $checkWfid = FasyankesWarehouse::where('wfid', $request->wfid)->first();
+        if (!$checkWfid) {
+            return response()->json([
+                'status' => false,
+                'message' => 'WFID not found'
+            ], 404);
         }
 
         $perPage = $request->get('per_page', 10);
@@ -94,6 +103,13 @@ class TransaksiController extends Controller
         }
 
         $wfid = $request->wfid;
+        $checkWfid = FasyankesWarehouse::where('wfid', $wfid)->first();
+        if (!$checkWfid) {
+            return response()->json([
+                'status' => false,
+                'message' => 'WFID not found'
+            ], 404);
+        }
         $barangList = $request->barang;
 
         foreach ($barangList as $barangData) {

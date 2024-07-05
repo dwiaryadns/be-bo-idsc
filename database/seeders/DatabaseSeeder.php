@@ -42,7 +42,14 @@ class DatabaseSeeder extends Seeder
             'name' => 'Warehouse Teguh Test',
             'address' => 'Jalan',
             'pic' => 'Teguh',
-            'contact' => '08293492739427',
+            'contact' => '08293492710239',
+        ]);
+        $warehouse2 = Warehouse::create([
+            'bisnis_owner_id' => 2,
+            'name' => 'Warehouse Arya Test',
+            'address' => 'Jalan',
+            'pic' => 'Arya',
+            'contact' => '08293492710239',
         ]);
         $fasyankes = Fasyankes::create([
             'fasyankesId' => '12345678',
@@ -77,7 +84,7 @@ class DatabaseSeeder extends Seeder
             [
                 'wfid' => 'WFID00002',
                 'fasyankes_id' => $fasyankes2->fasyankesId,
-                'warehouse_id' => $warehouse->id,
+                'warehouse_id' => $warehouse2->id,
             ],
         ];
 
