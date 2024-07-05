@@ -10,7 +10,7 @@ class KategoriBarangApotek extends Model
     use HasFactory;
 
     protected $primaryKey = 'kategori_id';
-    protected $incrementing = false;
+    public $incrementing = false;
     protected $keyType = 'string';
 
     protected $fillable = [
