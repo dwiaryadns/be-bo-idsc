@@ -20,7 +20,7 @@ class StockBarangsSeeder extends Seeder
             [
                 'stok_barang_id' => 'STOKBARANG00002',
                 'fasyankes_warehouse_id' => 'WFID00001',
-                'barang_id' => 'BARANG00001',
+                'barang_id' => 'BARANG00002',
                 'stok' => 50
             ],
             [

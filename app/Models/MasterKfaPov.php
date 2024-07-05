@@ -20,6 +20,8 @@ class MasterKfaPov extends Model
         'product_state',
         'pov_desc'
     ];
+    protected $hidden = ['created_at', 'updated_at'];
+
 
     public function masterKfa()
     {

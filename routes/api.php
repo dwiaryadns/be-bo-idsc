@@ -46,6 +46,7 @@ Route::middleware('check.token')->group(function () {
     Route::get('/master-kfa/pov', [MasterKfaController::class, 'kfa_pov']);
     Route::get('/master-kfa/pov/poa', [MasterKfaController::class, 'kfa_poa']);
 
+    Route::get('/master-kategori', [TransaksiController::class, 'master_kategori']);
     Route::get('/master-barang', [TransaksiController::class, 'master_barang']);
     Route::post('/decrease-stock', [TransaksiController::class, 'decreaseStock']);
 });

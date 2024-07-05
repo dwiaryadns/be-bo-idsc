@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('barangs', function (Blueprint $table) {
             $table->string('barang_id')->primary();
+            $table->string('kategori_id')->nullable();
+            $table->unsignedBigInteger('kfa_poa_code')->nullable(); // Change to unsignedBigInteger
             $table->string('nama_barang');
-            $table->string('kategori_id');
             $table->foreign('kategori_id')->references('kategori_id')->on('kategori_barang_apoteks')->onDelete('cascade');
+            $table->foreign('kfa_poa_code')->references('kfa_poa_code')->on('master_kfa_poas')->onDelete('cascade');
             $table->string('satuan');
             $table->decimal('harga_beli', 10, 2);
             $table->decimal('harga_jual', 10, 2);

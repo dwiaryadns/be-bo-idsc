@@ -18,7 +18,8 @@ class MasterKfa extends Model
         'bza_desc',
         'kfa_code_idsc'
     ];
-
+    protected $hidden = ['created_at', 'updated_at'];
+    
     public function kfaPovs()
     {
         return $this->hasMany(MasterKfaPov::class, 'kfa_code', 'kfa_code');

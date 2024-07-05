@@ -25,6 +25,8 @@ class MasterKfaPoa extends Model
         'estimate_pack_price'
     ];
 
+    protected $hidden = ['created_at', 'updated_at'];
+
     public function masterKfaPov()
     {
         return $this->belongsTo(MasterKfaPov::class, 'kfa_pov_code', 'kfa_pov_code');

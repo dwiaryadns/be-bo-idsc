@@ -27,13 +27,15 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:bisnis_owners',
+            'name' => 'required|string|max:255|regex:/^[A-Za-z\s]+$/',
+            'email' => 'required|email|max:255|unique:bisnis_owners|regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
             'password' => [
                 'required', 'string', 'confirmed', 'min:8', 'regex:/[A-Z]/', 'regex:/[!@#$%^&*(),.?":{}|<>_]/', 'regex:/[0-9]/'
             ],
         ], [
             'password.regex' => 'Password must contain at least 1 Uppercase Word, 1 Special Character, and 1 Number',
+            'email.regex' => 'Invalid format email',
+            'name.regex' => 'Invalid format fullname',
         ]);
 
         if ($validator->fails()) {

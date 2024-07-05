@@ -14,6 +14,7 @@ class BarangsSeeder extends Seeder
             [
                 'barang_id' => 'BARANG00001',
                 'nama_barang' => 'Paracetamol',
+                'kfa_poa_code'=> 93012420,
                 'kategori_id' => 'KATEGORI00001',
                 'satuan' => 'Box',
                 'harga_beli' => 10000.00,
@@ -23,6 +24,7 @@ class BarangsSeeder extends Seeder
             [
                 'barang_id' => 'BARANG00002',
                 'nama_barang' => 'Vitamin C',
+                'kfa_poa_code'=> null,
                 'kategori_id' => 'KATEGORI00004',
                 'satuan' => 'Botol',
                 'harga_beli' => 50000.00,
@@ -32,6 +34,7 @@ class BarangsSeeder extends Seeder
             [
                 'barang_id' => 'BARANG00003',
                 'nama_barang' => 'Aspirin',
+                'kfa_poa_code'=> null,
                 'kategori_id' => 'KATEGORI00002',
                 'satuan' => 'Box',
                 'harga_beli' => 15000.00,
@@ -41,6 +44,7 @@ class BarangsSeeder extends Seeder
             [
                 'barang_id' => 'BARANG00004',
                 'nama_barang' => 'Hand Sanitizer',
+                'kfa_poa_code'=> null,
                 'kategori_id' => 'KATEGORI000025',
                 'satuan' => 'Botol',
                 'harga_beli' => 20000.00,
@@ -50,6 +54,7 @@ class BarangsSeeder extends Seeder
             [
                 'barang_id' => 'BARANG00005',
                 'nama_barang' => 'Thermometer',
+                'kfa_poa_code'=> null,
                 'kategori_id' => 'KATEGORI000014',
                 'satuan' => 'Unit',
                 'harga_beli' => 50000.00,

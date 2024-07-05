@@ -10,8 +10,7 @@ class KategoriBarangApotek extends Model
     use HasFactory;
 
     protected $fillable = [
+        'kategori_id',
         'nama'
     ];
-
-    
 }

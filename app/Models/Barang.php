@@ -14,12 +14,20 @@ class Barang extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'barang_id', 'nama_barang', 'kategori_id', 'satuan', 'harga_beli', 'harga_jual', 'deskripsi'
+        'barang_id', 'kfa_poa_code', 'nama_barang', 'kategori_id', 'satuan', 'harga_beli', 'harga_jual', 'deskripsi'
     ];
+    protected $hidden = ['created_at', 'updated_at'];
+
 
     public function kategori_barang()
     {
-        return $this->belongsTo(KategoriBarangApotek::class, 'kategori_id', 'kategori_id');
+        return $this->belongsTo(KategoriBarangApotek::class, 'kategori_id', 'kategori_id')->select('kategori_id', 'nama');
+    }
+
+    public function kfa_poa()
+    {
+        return $this->belongsTo(MasterKfaPoa::class, 'kfa_poa_code', 'kfa_poa_code')->whereNotNull('kfa_poa_code')
+            ->whereNotNull('kfa_poa_code');
     }
 
     public function supplier_barangs()

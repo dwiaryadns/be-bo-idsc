@@ -26,7 +26,7 @@ class MasterKfaController extends Controller
         if (!empty($search)) {
             $query->where(function ($q) use ($search, $searchableColumns) {
                 foreach ($searchableColumns as $column) {
-                    $q->orWhere($column, 'like', '%' . $search . '%');
+                    $q->orWhereRaw("LOWER($column) LIKE ?", ['%' . strtolower($search) . '%']);
                 }
             });
         }

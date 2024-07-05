@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Core;
 
 use App\Http\Controllers\Controller;
 use App\Models\Barang;
+use App\Models\KategoriBarangApotek;
 use App\Models\StockBarang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -11,6 +12,26 @@ use Illuminate\Support\Facades\Validator;
 
 class TransaksiController extends Controller
 {
+
+    public function master_kategori(Request $request)
+    {
+        $perPage = $request->get('per_page', 10);
+        $page = $request->get('page', 1);
+        $search = $request->get('search', '');
+        $query = KategoriBarangApotek::query();
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->whereRaw('LOWER(nama) LIKE ?', ['%' . strtolower($search) . '%']);
+            });
+        }
+        $barangs = $query->select('kategori_id', 'nama')->paginate($perPage, ['*'], 'page', $page);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Success Get Master Kategori',
+            'data' => $barangs
+        ], 200);
+    }
     public function master_barang(Request $request)
     {
         if (!$request->has('wfid')) {
@@ -29,13 +50,21 @@ class TransaksiController extends Controller
 
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
-                $q->where('stok_barang_id', 'like', '%' . $search . '%')
-                    ->orWhere("barang_id", 'like', '%' . $search . '%')
-                    ->orWhere("stok", 'like', '%' . $search . '%');
+                $q->whereRaw('LOWER(stok_barang_id) LIKE ?', ['%' . strtolower($search) . '%'])
+                    ->orWhereRaw('LOWER(barang_id) LIKE ?', ['%' . strtolower($search) . '%'])
+                    ->orWhereRaw('LOWER(stok) LIKE ?', ['%' . strtolower($search) . '%'])
+                    ->orWhereHas('barang', function ($query) use ($search) {
+                        $query->whereRaw('LOWER(nama_barang) LIKE ?', ['%' . strtolower($search) . '%'])
+                            ->orWhereRaw('LOWER(deskripsi) LIKE ?', ['%' . strtolower($search) . '%'])
+                            ->orWhereHas('kategori_barang', function ($query) use ($search) {
+                                $query->whereRaw('LOWER(nama) LIKE ?', ['%' . strtolower($search) . '%']);
+                            });
+                    });
             });
         }
 
-        $barangs = $query->with('barang.kategori_barang')
+        $barangs = $query->with('barang', 'barang.kategori_barang', 'barang.kfa_poa.masterKfaPov.masterKfa')
+            ->select('stok_barang_id', 'fasyankes_warehouse_id', 'barang_id', 'stok')
             ->where('fasyankes_warehouse_id', $wfid)
             ->paginate($perPage, ['*'], 'page', $page);
 
@@ -45,6 +74,7 @@ class TransaksiController extends Controller
             'data' => $barangs
         ], 200);
     }
+
 
     public function decreaseStock(Request $request)
     {
