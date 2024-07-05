@@ -15,7 +15,7 @@ class StockBarangsSeeder extends Seeder
                 'stok_barang_id' => 'STOKBARANG00001',
                 'fasyankes_warehouse_id' => 'WFID00001',
                 'barang_id' => 'BARANG00001',
-                'stok' => 100
+                'stok' => 200
             ],
             [
                 'stok_barang_id' => 'STOKBARANG00002',
@@ -26,14 +26,14 @@ class StockBarangsSeeder extends Seeder
             [
                 'stok_barang_id' => 'STOKBARANG00003',
                 'fasyankes_warehouse_id' => 'WFID00002',
-                'barang_id' => 'BARANG00003',
+                'barang_id' => 'BARANG00001',
                 'stok' => 200
             ],
             [
                 'stok_barang_id' => 'STOKBARANG00004',
                 'fasyankes_warehouse_id' => 'WFID00002',
-                'barang_id' => 'BARANG00004',
-                'stok' => 75
+                'barang_id' => 'BARANG00002',
+                'stok' => 50
             ],
             [
                 'stok_barang_id' => 'STOKBARANG00005',

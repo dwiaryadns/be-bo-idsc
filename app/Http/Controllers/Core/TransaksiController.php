@@ -116,7 +116,7 @@ class TransaksiController extends Controller
                     'message' => "Stok barang dengan ID $barangID tidak mencukupi"
                 ], 422);
             }
-            $barang->stok -= $jumlah;
+            $barang->decreaseStock($barang->fasyankes_warehouse->warehouse_id, $jumlah);
             $barang->save();
         }
 
