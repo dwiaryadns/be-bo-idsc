@@ -52,11 +52,12 @@ class TransaksiController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->whereRaw('LOWER(stok_barang_id) LIKE ?', ['%' . strtolower($search) . '%'])
                     ->orWhereRaw('LOWER(barang_id) LIKE ?', ['%' . strtolower($search) . '%'])
-                    ->orWhereRaw('LOWER(stok) LIKE ?', ['%' . strtolower($search) . '%'])
+                    ->orWhere('stok', 'LIKE', '%' . $search . '%')
                     ->orWhereHas('barang', function ($query) use ($search) {
                         $query->whereRaw('LOWER(nama_barang) LIKE ?', ['%' . strtolower($search) . '%'])
                             ->orWhereRaw('LOWER(deskripsi) LIKE ?', ['%' . strtolower($search) . '%'])
                             ->orWhereHas('kategori_barang', function ($query) use ($search) {
+                                $query->whereRaw('LOWER(nama) LIKE ?', ['%' . strtolower($search) . '%']);
                                 $query->whereRaw('LOWER(nama) LIKE ?', ['%' . strtolower($search) . '%']);
                             });
                     });
