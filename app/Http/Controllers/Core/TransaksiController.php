@@ -102,6 +102,14 @@ class TransaksiController extends Controller
             return response()->json(['status' => false, 'errors' => $errors], 422);
         }
 
+        $barangIds = collect($request->barang)->pluck('barang_id');
+        if ($barangIds->count() !== $barangIds->unique()->count()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Duplicate barang_id found in the request'
+            ], 422);
+        }
+
         $wfid = $request->wfid;
         $checkWfid = FasyankesWarehouse::where('wfid', $wfid)->first();
         if (!$checkWfid) {
@@ -112,27 +120,30 @@ class TransaksiController extends Controller
         }
         $barangList = $request->barang;
 
+        $stockBarangs = StockBarang::where('fasyankes_warehouse_id', $wfid)
+            ->whereIn('barang_id', $barangIds)
+            ->get()
+            ->keyBy('barang_id'); 
         foreach ($barangList as $barangData) {
             $barangID = $barangData['barang_id'];
             $jumlah = $barangData['qty'];
-
-            $barang = StockBarang::where('barang_id', $barangID)
-                ->where('fasyankes_warehouse_id', $wfid)
-                ->first();
-
-            if (!$barang) {
+            if (!isset($stockBarangs[$barangID])) {
                 return response()->json([
                     'status' => false,
                     'message' => "Barang dengan ID $barangID tidak ditemukan di WFID $wfid"
                 ], 404);
             }
+            $barang = $stockBarangs[$barangID];
             if ($barang->stok < $jumlah) {
                 return response()->json([
                     'status' => false,
                     'message' => "Stok barang dengan ID $barangID tidak mencukupi"
                 ], 422);
             }
-            $barang->decreaseStock($barang->fasyankes_warehouse->warehouse_id, $jumlah);
+            $barang->stok -= $jumlah;
+        }
+
+        foreach ($stockBarangs as $barang) {
             $barang->save();
         }
 

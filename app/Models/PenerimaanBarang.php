@@ -13,9 +13,21 @@ class PenerimaanBarang extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
+
     protected $fillable = [
-        'penerimaan_id', 'po_id', 'fasyankes_warehouse_id', 'tanggal_penerimaan', 'status', 'catatan'
+        'penerimaan_id', 'po_id', 'fasyankes_warehouse_id', 'tanggal_penerimaan', 'status', 'catatan', 'penerima', 'pengirim',
+        'pengecek'
     ];
+
+    protected $hidden = [
+        'created_at',
+        'updated_at'
+    ];
+
+    public function good_receipt_note()
+    {
+        return $this->hasOne(GoodReceiptNote::class, 'penerimaan_id', 'penerimaan_id');
+    }
 
     public function pembelian()
     {

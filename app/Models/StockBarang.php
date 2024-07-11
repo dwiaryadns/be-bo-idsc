@@ -26,18 +26,4 @@ class StockBarang extends Model
     {
         return $this->belongsTo(FasyankesWarehouse::class, 'fasyankes_warehouse_id', 'wfid');
     }
-
-    public function decreaseStock($warehouseId, $stok)
-    {
-        $getFasyankesWarehouse = FasyankesWarehouse::where('warehouse_id', $warehouseId)->get();
-        foreach ($getFasyankesWarehouse as $key => $fw) {
-            $stockBarang = StockBarang::where('fasyankes_warehouse_id', $fw->wfid)
-                ->where('barang_id', $this->barang_id)
-                ->first();
-            if ($stockBarang) {
-                $stockBarang->stok -= $stok;
-                $stockBarang->save();
-            }
-        }
-    }
 }

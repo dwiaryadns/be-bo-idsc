@@ -13,7 +13,7 @@ class DetailPenerimaanBarang extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'detil_penerimaan_id', 'penerimaan_id', 'barang_id', 'jumlah', 'kondisi', 'catatan'
+        'detil_penerimaan_id', 'penerimaan_id', 'barang_id', 'jumlah', 'status', 'kondisi', 'jml_datang', 'jml_kurang'
     ];
 
     public function penerimaan_barang()

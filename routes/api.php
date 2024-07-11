@@ -10,6 +10,8 @@ use App\Http\Controllers\Core\TransaksiController;
 use App\Http\Controllers\FasyankesController;
 use App\Http\Controllers\LegalDocController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PembelianController;
+use App\Http\Controllers\PenerimaanController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\WarehouseController;
 use Illuminate\Support\Facades\Route;
@@ -72,4 +74,14 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/legal-document-fasyankes/upload', [LegalDocController::class, 'uploadLegalFasyankes']);
 
     Route::get('/subscription/{type}', [SubscriptionController::class, 'index']);
+
+    Route::post('/change-password', [AuthController::class, 'changePassword']);
+
+    Route::post('/purchase', [PembelianController::class, 'purchase']);
+
+    Route::prefix('/good-receipt')->group(function () {
+        Route::get('/', [PenerimaanController::class, 'penerimaan']);
+        Route::get('/search', [PenerimaanController::class, 'showByPoId']);
+        Route::post('/save', [PenerimaanController::class, 'save']);
+    });
 });

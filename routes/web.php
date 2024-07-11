@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PenerimaanController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,4 +16,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/test-otp', function () {
     return view('otp-email');
+});
+Route::get('/generate-pdf', function () {
+    return view('grn-template');
 });

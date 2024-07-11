@@ -36,7 +36,7 @@ class LegalDocController extends Controller
     private function validateFiles(Request $request, $type)
     {
         Log::info('Entering validateFiles method with type: ' . $type);
-        $maxFileSize = 10240;
+        $maxFileSize = 2000;
         $rules = [
             'iso' => 'nullable|file|mimes:pdf|max:' . $maxFileSize,
             'password' => [

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('kategori_barang_apoteks', function (Blueprint $table) {
             $table->string('kategori_id')->primary();
             $table->string('nama');
+            
             $table->timestamps();
         });
     }

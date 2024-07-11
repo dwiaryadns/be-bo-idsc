@@ -108,7 +108,8 @@ class DatabaseSeeder extends Seeder
         $this->call(StockBarangsSeeder::class);
         $this->call(PembelianSeeder::class);
         $this->call(DetailPembelianSeeder::class);
-        $this->call(PenerimaanBarangSeeder::class);
-        $this->call(DetailPenerimaanBarangSeeder::class);
+        // $this->call(PenerimaanBarangSeeder::class);
+        // $this->call(DetailPenerimaanBarangSeeder::class);
+        // $this->call(GoodReceiptNoteSeeder::class);
     }
 }

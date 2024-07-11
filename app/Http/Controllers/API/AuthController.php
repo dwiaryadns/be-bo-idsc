@@ -191,7 +191,9 @@ class AuthController extends Controller
         ];
 
         $bo = BisnisOwner::where('email', $request->email)->first();
-        $bo->markEmailAsVerified();
+        if ($bo) {
+            $bo->markEmailAsVerified();
+        }
 
         $data = [
             'otp_id' => $request->input('otp_id'),
@@ -214,5 +216,46 @@ class AuthController extends Controller
         }
         Log::info($response);
         return response()->json(json_decode($response, true));
+    }
+
+    public function changePassword(Request $request)
+    {
+        $user = Auth::guard('bisnis_owner')->user();
+
+        $validator = Validator::make($request->all(), [
+            'old_password' => ['required', 'string'],
+            'new_password' => [
+                'required', 'string', 'min:8', 'confirmed',
+                'regex:/[A-Z]/', 'regex:/[!@#$%^&*(),.?":{}|<>_]/', 'regex:/[0-9]/',
+                function ($attribute, $value, $fail) use ($user) {
+                    if (Hash::check($value, $user->password)) {
+                        $fail('The new password cannot be the same as the old password.');
+                    }
+                }
+            ],
+            'new_password_confirmation' => ['required', 'min:8', 'regex:/[A-Z]/', 'regex:/[!@#$%^&*(),.?":{}|<>_]/', 'regex:/[0-9]/']
+        ]);
+
+        if ($validator->fails()) {
+            $errors = collect($validator->errors())->map(function ($messages) {
+                return $messages[0];
+            });
+            return response()->json(['status' => false, 'errors' => $errors], 422);
+        }
+
+        if (!$user || !Hash::check($request->old_password, $user->password)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid old password'
+            ], 401);
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Password has been updated successfully'
+        ], 200);
     }
 }

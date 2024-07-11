@@ -18,6 +18,9 @@ return new class extends Migration
             $table->date('tanggal_penerimaan');
             $table->string('status', 50);
             $table->text('catatan');
+            $table->string('penerima')->nullable();
+            $table->string('pengirim')->nullable();
+            $table->string('pengecek')->nullable();
             $table->foreign('po_id')->references('po_id')->on('pembelians')->onDelete('cascade');
             $table->foreign('fasyankes_warehouse_id')->references('wfid')->on('fasyankes_warehouse')->onDelete('cascade');
             $table->timestamps();
