@@ -57,7 +57,9 @@ class PenerimaanController extends Controller
             ], 400);
         }
         $poId = strtoupper($request->po_id);
-        $pembelian = Pembelian::where('po_id', $poId)->first();
+        $pembelian = Pembelian::whereRelation('fasyankes_warehouse.fasyankes.bisnis_owner', 'id', Auth::guard('bisnis_owner')->user()->id)
+            ->where('po_id', $poId)
+            ->first();
 
         if (!$pembelian) {
             return response()->json([
