@@ -100,6 +100,34 @@ class DatabaseSeeder extends Seeder
             'id_profile' => null
         ]);
 
+        AccessFasyankes::create([
+            'fasyankes_id' => '12345678',
+            'username' => 'perawat_coba',
+            'password' => Hash::make('Coba123*#'),
+            'is_active' => 1,
+            'created_by' => 'Teguh',
+            'role' => 'perawat',
+            'id_profile' => 2
+        ]);
+        AccessFasyankes::create([
+            'fasyankes_id' => '12345678',
+            'username' => 'dokter_coba',
+            'password' => Hash::make('Coba123*#'),
+            'is_active' => 1,
+            'created_by' => 'Teguh',
+            'role' => 'dokter',
+            'id_profile' => 3
+        ]);
+        AccessFasyankes::create([
+            'fasyankes_id' => '12345678',
+            'username' => 'farmasi_coba',
+            'password' => Hash::make('Coba123*#'),
+            'is_active' => 1,
+            'created_by' => 'Teguh',
+            'role' => 'farmasi',
+            'id_profile' => 4
+        ]);
+
         $this->call(KfaSeeder::class);
         $this->call(KategoriBarangApotekSeeder::class);
         $this->call(SuppliersSeeder::class);
