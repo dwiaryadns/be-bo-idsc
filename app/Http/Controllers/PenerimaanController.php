@@ -196,8 +196,6 @@ class PenerimaanController extends Controller
             Log::info("Pembelian Found:" . $getPembelian);
             $getPembelian->update(['status' => 'Received']);
 
-            $updateBarang = $getPembelian->
-
             $grn = GoodReceiptNote::create([
                 'grn_id' => 'GRN-' . date('Y') . date('m') . str_pad($countGrn + 1, 5, "0", STR_PAD_LEFT),
                 'penerimaan_id' => $penerimaan->penerimaan_id,
