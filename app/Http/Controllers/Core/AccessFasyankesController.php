@@ -6,6 +6,7 @@ use App\Models\AccessFasyankes;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class AccessFasyankesController extends Controller
@@ -134,6 +135,106 @@ class AccessFasyankesController extends Controller
             'status' => true,
             'message' => 'Access Fasyankes added successfully',
             'data' => $data,
+        ], 200);
+    }
+
+    public function listUsername(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'fasyankes_id' => 'required',
+        ], [
+            'fasyankes_id.required' => 'Fasyankes ID Wajib Diisi'
+        ]);
+
+        if ($validator->fails()) {
+            $errors = collect($validator->errors())->map(function ($messages) {
+                return $messages[0];
+            });
+            return response()->json(['status' => false, 'errors' => $errors], 422);
+        }
+        $getFasyankes = AccessFasyankes::where('fasyankes_id', $request->fasyankes_id)
+            ->get();
+
+        if (!$getFasyankes) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Access Fasyankes not found'
+            ], 404);
+        }
+        $data = [];
+        foreach ($getFasyankes as $usn) {
+            $data[] = [
+                'username' => $usn->username,
+                'id_profile' => $usn->id_profile,
+                'role' => $usn->role
+            ];
+        }
+        return response()->json([
+            'status' => true,
+            'message' => 'Success Get List Username',
+            'data' => $data
+        ]);
+    }
+
+    public function updateAccessFasyankes(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'username' => 'required',
+            'role' => 'required',
+            'is_active' => 'required|boolean',
+            'old_password' => 'nullable',
+            'new_password' => [
+                'nullable', 'string', 'min:8', 'regex:/[A-Z]/', 'regex:/[!@#$%^&*(),.?":{}|<>_]/', 'regex:/[0-9]/'
+            ],
+        ], [
+            'new_password.regex' => 'New Password must contain at least 1 Uppercase Word, 1 Special Character, and 1 Number',
+        ]);
+        $validator->sometimes('new_password', 'required', function ($input) {
+            return !empty($input->old_password);
+        });
+
+
+        if ($validator->fails()) {
+            $errors = collect($validator->errors())->map(function ($messages) {
+                return $messages[0];
+            });
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => 'Update Access Fasyankes Failed',
+                    'errors' => $errors
+                ],
+                422
+            );
+        }
+
+        Log::info($request->all());
+        $getFasyankes = AccessFasyankes::where('username', $request->username)->first();
+        if (!$getFasyankes) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Access Fasyankes not found'
+            ], 404);
+        }
+        if ($request->old_password) {
+            if (!Hash::check($request->old_password, $getFasyankes->password)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Old password is incorrect'
+                ], 401);
+            }
+
+            $getFasyankes->update([
+                'password' => Hash::make($request->new_password),
+            ]);
+        }
+        $getFasyankes->update([
+            'is_active' => $request->is_active,
+            'role' => $request->role,
+        ]);
+        return response()->json([
+            'status' => true,
+            'message' => 'Access Fasyankes updated successfully',
         ], 200);
     }
 }

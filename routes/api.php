@@ -43,6 +43,8 @@ Route::post('/password/reset', [ResetPasswordController::class, 'resetPassword']
 Route::middleware('check.token')->group(function () {
     Route::post('/access-fasyankes', [AccessFasyankesController::class, 'checkAccessFasyankes']);
     Route::post('/access-fasyankes/store', [AccessFasyankesController::class, 'storeAccessFasyankes']);
+    Route::post('/access-fasyankes/update', [AccessFasyankesController::class, 'updateAccessFasyankes']);
+    Route::post('/list-username', [AccessFasyankesController::class, 'listUsername']);
 
     Route::get('/master-kfa', [MasterKfaController::class, 'index']);
     Route::get('/master-kfa/pov', [MasterKfaController::class, 'kfa_pov']);
@@ -77,7 +79,10 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
     Route::post('/change-password', [AuthController::class, 'changePassword']);
 
-    Route::post('/purchase', [PembelianController::class, 'purchase']);
+    Route::prefix('/purchase')->group(function () {
+        Route::get('/get-barang-supplier', [PembelianController::class, 'getBarangSupplier']);
+        Route::post('/purchase', [PembelianController::class, 'purchase']);
+    });
 
     Route::prefix('/good-receipt')->group(function () {
         Route::get('/', [PenerimaanController::class, 'penerimaan']);
