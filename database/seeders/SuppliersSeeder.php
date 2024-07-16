@@ -16,6 +16,7 @@ class SuppliersSeeder extends Seeder
         $suppliers = [
             [
                 'supplier_id' => 'SUPPLIER00001',
+                'bisnis_owner_id' => 2,
                 'nama_supplier' => 'Supplier A',
                 'alamat' => 'Jl. Merdeka 1',
                 'kota' => 'Jakarta',
@@ -36,6 +37,7 @@ class SuppliersSeeder extends Seeder
             [
                 'supplier_id' => 'SUPPLIER00002',
                 'nama_supplier' => 'Supplier B',
+                'bisnis_owner_id' => 2,
                 'alamat' => 'Jl. Merdeka 2',
                 'kota' => 'Bandung',
                 'provinsi' => 'Jawa Barat',
@@ -55,6 +57,7 @@ class SuppliersSeeder extends Seeder
             [
                 'supplier_id' => 'SUPPLIER00003',
                 'nama_supplier' => 'Supplier C',
+                'bisnis_owner_id' => 2,
                 'alamat' => 'Jl. Merdeka 3',
                 'kota' => 'Surabaya',
                 'provinsi' => 'Jawa Timur',
@@ -74,6 +77,7 @@ class SuppliersSeeder extends Seeder
             [
                 'supplier_id' => 'SUPPLIER00004',
                 'nama_supplier' => 'Supplier D',
+                'bisnis_owner_id' => 2,
                 'alamat' => 'Jl. Merdeka 4',
                 'kota' => 'Medan',
                 'provinsi' => 'Sumatera Utara',
@@ -93,6 +97,7 @@ class SuppliersSeeder extends Seeder
             [
                 'supplier_id' => 'SUPPLIER00005',
                 'nama_supplier' => 'Supplier E',
+                'bisnis_owner_id' => 2,
                 'alamat' => 'Jl. Merdeka 5',
                 'kota' => 'Makassar',
                 'provinsi' => 'Sulawesi Selatan',

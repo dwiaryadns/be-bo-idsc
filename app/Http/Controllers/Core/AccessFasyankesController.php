@@ -139,42 +139,46 @@ class AccessFasyankesController extends Controller
     }
 
     public function listUsername(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'fasyankes_id' => 'required',
-        ], [
-            'fasyankes_id.required' => 'Fasyankes ID Wajib Diisi'
-        ]);
+{
+    $validator = Validator::make($request->query(), [
+        'fasyankes_id' => 'required',
+    ], [
+        'fasyankes_id.required' => 'Fasyankes ID Wajib Diisi'
+    ]);
 
-        if ($validator->fails()) {
-            $errors = collect($validator->errors())->map(function ($messages) {
-                return $messages[0];
-            });
-            return response()->json(['status' => false, 'errors' => $errors], 422);
-        }
-        $getFasyankes = AccessFasyankes::where('fasyankes_id', $request->fasyankes_id)
-            ->get();
-
-        if (!$getFasyankes) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Access Fasyankes not found'
-            ], 404);
-        }
-        $data = [];
-        foreach ($getFasyankes as $usn) {
-            $data[] = [
-                'username' => $usn->username,
-                'id_profile' => $usn->id_profile,
-                'role' => $usn->role
-            ];
-        }
-        return response()->json([
-            'status' => true,
-            'message' => 'Success Get List Username',
-            'data' => $data
-        ]);
+    if ($validator->fails()) {
+        $errors = collect($validator->errors())->map(function ($messages) {
+            return $messages[0];
+        });
+        return response()->json(['status' => false, 'errors' => $errors], 422);
     }
+
+    $getFasyankes = AccessFasyankes::where('fasyankes_id', $request->query('fasyankes_id'))
+        ->get();
+
+    if ($getFasyankes->isEmpty()) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Access Fasyankes not found'
+        ], 404);
+    }
+
+    $data = [];
+    foreach ($getFasyankes as $usn) {
+        $data[] = [
+            'username' => $usn->username,
+            'id_profile' => $usn->id_profile,
+            'role' => $usn->role
+        ];
+    }
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Success Get List Username',
+        'data' => $data
+    ]);
+}
+
 
     public function updateAccessFasyankes(Request $request)
     {

@@ -14,7 +14,7 @@ class DetailPembelian extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'detil_po_id', 'po_id', 'barang_id', 'jumlah', 'harga_satuan', 'total_harga'
+        'detil_po_id', 'notes', 'po_id', 'barang_id', 'jumlah', 'harga_satuan', 'total_harga'
     ];
 
     public function pembelian()

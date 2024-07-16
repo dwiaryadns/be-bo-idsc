@@ -57,6 +57,11 @@ class BisnisOwner extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Fasyankes::class);
     }
 
+    public function suppliers()
+    {
+        return $this->hasMany(Supplier::class, 'bisnis_owner_id', 'id');
+    }
+
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new ResetPasswordNotification($token));

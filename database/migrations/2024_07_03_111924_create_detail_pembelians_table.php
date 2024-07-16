@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('jumlah');
             $table->decimal('harga_satuan', 10, 2);
             $table->decimal('total_harga', 10, 2);
+            $table->text('notes')->nullable();
             $table->foreign('po_id')->references('po_id')->on('pembelians')->onDelete('cascade');
             $table->foreign('barang_id')->references('barang_id')->on('barangs')->onDelete('cascade');
             $table->timestamps();

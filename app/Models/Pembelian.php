@@ -14,7 +14,7 @@ class Pembelian extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'po_id', 'supplier_id','po_name' ,'fasyankes_warehouse_id', 'tanggal_po', 'status', 'total_harga', 'catatan'
+        'po_id', 'supplier_id', 'po_name', 'fasyankes_warehouse_id', 'tanggal_po', 'status', 'total_harga', 'catatan'
     ];
 
     public function supplier()

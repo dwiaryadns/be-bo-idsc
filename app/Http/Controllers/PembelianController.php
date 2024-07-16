@@ -7,27 +7,123 @@ use App\Models\DetailPembelian;
 use App\Models\FasyankesWarehouse;
 use App\Models\Pembelian;
 use App\Models\StockBarang;
+use App\Models\SupplierBarang;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class PembelianController extends Controller
 {
+    public function getPurchase()
+    {
+        $purchase = Pembelian::with('detail_pembelians.barang')
+            ->whereRelation('fasyankes_warehouse.fasyankes.bisnis_owner', 'id', Auth::guard('bisnis_owner')->user()->id)
+            ->get();
+
+        $data = [];
+        foreach ($purchase as $p) {
+            $data[] = [
+                'po_id' => $p->po_id,
+                'tanggal_po' => date('d M Y', strtotime($p->tanggal_po)),
+                'po_name' => $p->po_name,
+                'status' => $p->status,
+                'warehouse' => $p->fasyankes_warehouse->warehouse->name,
+                'supplier' => $p->supplier->nama_supplier,
+                'total' => $p->total_harga,
+                'detail' => $p->detail_pembelians
+            ];
+        }
+
+        return response()->json(['status' => true, 'data' => $data], 200);
+    }
+
+    public function getFasyankesWarehouse()
+    {
+        try {
+            $fasyankesWarehouses = FasyankesWarehouse::with('fasyankes', 'warehouse')->whereRelation('fasyankes.bisnis_owner', 'id', Auth::guard('bisnis_owner')->user()->id)->get();
+
+            $data = [];
+            foreach ($fasyankesWarehouses as $wf) {
+                $data[] = [
+                    'wfid' => $wf->wfid,
+                    'fasyankes_name' => $wf->fasyankes->name,
+                    'fasyankes_id' => $wf->fasyankes_id,
+                    'warehouse_name' => $wf->warehouse->name,
+                    'warehouse_id' => $wf->warehouse_id,
+                ];
+            }
+            return response()->json([
+                'status' => true,
+                'message' => 'success get fasyankes warehouse',
+                'data' => $data
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'error get fasyankes warehouse',
+                'error' => $th->getMessage()
+            ]);
+        }
+    }
+
+    public function getBarangSupplier(Request $request)
+    {
+        $bo = Auth::guard('bisnis_owner')->user();
+        if (!$bo) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User is not authenticated'
+            ], 401);
+        }
+
+        $perPage = $request->get('per_page', 10);
+        $page = $request->get('page', 1);
+        $search = $request->get('search', '');
+        $query = SupplierBarang::query();
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->whereRaw('LOWER(supplier_barang_id) LIKE ?', ['%' . strtolower($search) . '%'])
+                    ->orWhereRaw('LOWER(barang_id) LIKE ?', ['%' . strtolower($search) . '%'])
+                    ->orWhereRaw('LOWER(supplier_barang_id) LIKE ?', ['%' . strtolower($search) . '%'])
+                    ->orWhereRaw('LOWER(harga) LIKE ?', ['%' . strtolower($search) . '%']);
+            });
+        }
+        $barangs = $query->with('supplier', 'barang.kfa_poa')->whereHas('supplier', function ($q) use ($bo) {
+            $q->where('bisnis_owner_id', $bo->id);
+        })->paginate($perPage, ['*'], 'page', $page);
+        Log::info($barangs);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Success Get Supplier Barang',
+            'data' => $barangs
+        ], 200);
+    }
+
     public function purchase(Request $request)
     {
+        Log::info($request->all());
         $validator = Validator::make($request->all(), [
-            'barang' => 'required|array',
+            'barang' => 'required',
             'barang.*.barang_id' => 'required|string',
             'barang.*.qty' => 'required|numeric',
             'wfid' => 'required|string',
             'supplier_id' => 'required|string',
+            'po_name' => 'required'
+        ], [
+            'wfid' => 'The Warehouse field is required',
+            'po_name' => 'PO Name is required'
         ]);
 
         if ($validator->fails()) {
+            Log::error('Validation failed', ['errors' => $validator->errors()]);
             $errors = collect($validator->errors())->map(function ($messages) {
                 return $messages[0];
             });
-            return response()->json(['status' => false, 'errors' => $errors], 422);
+            return response()->json(['status' => false, 'message' => 'failed', 'errors' => $errors], 422);
         }
 
         $barangIds = collect($request->barang)->pluck('barang_id');
@@ -50,27 +146,15 @@ class PembelianController extends Controller
         $barangList = $request->barang;
         $supplierId = $request->supplier_id;
 
-        $stockBarangs = StockBarang::where('fasyankes_warehouse_id', $wfid)
-            ->whereIn('barang_id', $barangIds)
-            ->get()
-            ->keyBy('barang_id');
-
         $barangDetails = Barang::whereIn('barang_id', $barangIds)->get()->keyBy('barang_id');
 
         $totalHarga = 0;
-        $updateStockBarangs = [];
 
+        $countStockBarang = StockBarang::count();
         foreach ($barangList as $barangData) {
             $barangID = $barangData['barang_id'];
             $jumlah = $barangData['qty'];
-
-            $barang = $stockBarangs->get($barangID);
-            if (!$barang) {
-                return response()->json([
-                    'status' => false,
-                    'message' => "Barang dengan ID $barangID tidak ditemukan di WFID $wfid"
-                ], 404);
-            }
+            $notes = $barangData['notes'];
 
             $barangDetail = $barangDetails->get($barangID);
             if (!$barangDetail) {
@@ -84,15 +168,28 @@ class PembelianController extends Controller
             $totalHargaBarang = $hargaSatuan * $jumlah;
             $totalHarga += $totalHargaBarang;
 
-            $updateStockBarangs[] = $barang;
+            $stockBarang = StockBarang::where('fasyankes_warehouse_id', $wfid)
+                ->where('barang_id', $barangID)
+                ->first();
+
+            if (!$stockBarang) {
+                $newStockBarang = new StockBarang();
+                $newStockBarang->stok_barang_id = 'PO-' . date('Y') . date('m') . str_pad($countStockBarang + 1, 5, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999);
+                $newStockBarang->fasyankes_warehouse_id = $wfid;
+                $newStockBarang->barang_id = $barangID;
+                $newStockBarang->stok = $jumlah;
+                $newStockBarang->save();
+            }
         }
+
         $countPembelian = Pembelian::count();
         $pembelian = Pembelian::create([
-            'po_id' => 'PO-' . date('Y') . date('m') . str_pad($countPembelian + 1, 3, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999),
+            'po_name' => $request->po_name,
+            'po_id' => 'PO-' . date('Y') . date('m') . str_pad($countPembelian + 1, 5, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999),
             'supplier_id' => $supplierId,
             'fasyankes_warehouse_id' => $wfid,
-            'tanggal_po' => now(),
-            'status' => 'order',
+            'tanggal_po' => Carbon::now(),
+            'status' => 'Order',
             'total_harga' => $totalHarga,
             'catatan' => $request->notes
         ]);
@@ -104,23 +201,20 @@ class PembelianController extends Controller
             $barangDetail = $barangDetails->get($barangID);
             $hargaSatuan = $barangDetail->harga_beli;
             $totalHargaBarang = $hargaSatuan * $jumlah;
+            $notes = $barangData['notes'];
+
 
             $detailPembelianData[] = [
-                'detil_po_id' => Str::uuid()->toString(),
+                'detil_po_id' => 'DETIL-PO-' . date('Y') . date('m') . str_pad($countPembelian + 1, 3, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999),
                 'po_id' => $pembelian->po_id,
                 'barang_id' => $barangID,
                 'jumlah' => $jumlah,
                 'harga_satuan' => $hargaSatuan,
-                'total_harga' => $totalHargaBarang
+                'total_harga' => $totalHargaBarang,
+                'notes' => $notes
             ];
         }
         DetailPembelian::insert($detailPembelianData);
-
-        foreach ($updateStockBarangs as $barang) {
-            $barang->save();
-        }
-
-        
 
         return response()->json([
             'status' => true,
