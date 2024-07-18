@@ -58,7 +58,7 @@ class BoInfoController extends Controller
             'city' => 'required',
             'subdistrict' => 'required',
             'village' => 'required',
-            'postal_code' => 'required|numeric',
+            'postal_code' => 'required|numeric|min:5',
         ]);
         if ($validator->fails()) {
             $errors = collect($validator->errors())->map(function ($messages) {
