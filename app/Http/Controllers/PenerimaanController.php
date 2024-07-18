@@ -6,6 +6,7 @@ use App\Models\DetailPenerimaanBarang;
 use App\Models\GoodReceiptNote;
 use App\Models\Pembelian;
 use App\Models\PenerimaanBarang;
+use App\Models\StockBarang;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,8 +27,9 @@ class PenerimaanController extends Controller
             ]);
         }
 
-        $penerimaan = PenerimaanBarang::with('good_receipt_note', 'pembelian')
-            ->whereRelation('fasyankes_warehouse.fasyankes.bisnis_owner', 'id', Auth::guard('bisnis_owner')->user()->id)->get();
+        $penerimaan = PenerimaanBarang::with('good_receipt_note', 'pembelian', 'detailPending')
+            ->whereRelation('fasyankes_warehouse.fasyankes.bisnis_owner', 'id', Auth::guard('bisnis_owner')->user()->id)
+            ->get();
 
         $data = [];
         foreach ($penerimaan as $p) {
@@ -38,6 +40,7 @@ class PenerimaanController extends Controller
                 'status' => $p->status,
                 'grn_id' => $p->good_receipt_note ? $p->good_receipt_note->grn_id : null,
                 'url_file' => $p->good_receipt_note ? $p->good_receipt_note->url_file : null,
+                'pending' => $p->detailPending,
             ];
         }
 
@@ -176,11 +179,28 @@ class PenerimaanController extends Controller
                 'pengirim' => $request->pengirim,
                 'catatan' => $request->note,
             ]);
-            Log::info('Penerimaan Barang Created:', $penerimaan->toArray());
 
             $detailPenerimaan = [];
+            $barangIds = array_column($request->barangs, 'barang_id');
+            $countStockBarang = StockBarang::count();
+            $stockBarang = StockBarang::where('fasyankes_warehouse_id', $request->wfid)
+                ->whereIn('barang_id', $barangIds)
+                ->get()
+                ->keyBy('barang_id');
+
             foreach ($request->barangs as $barang) {
-                Log::info('Processing Barang:', $barang);
+
+                if (isset($stockBarang[$barang['barang_id']])) {
+                    $stockBarang[$barang['barang_id']]->stok += $barang['barangDatang'];
+                } else {
+                    $stockBarang[$barang['barang_id']] = new StockBarang([
+                        'stok_barang_id' => 'STOCK-' . date('Y') . date('m') . str_pad($countStockBarang + 1, 5, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999),
+                        'fasyankes_warehouse_id' => $request->wfid,
+                        'barang_id' => $barang['barang_id'],
+                        'stok' => $barang['barangDatang'],
+                    ]);
+                }
+
                 $detailPenerimaan[] = [
                     'detil_penerimaan_id' => 'DETIL-PEN-' . date('Y') . date('m') . str_pad($countPenerimaan + 1, 4, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999),
                     'penerimaan_id' => $penerimaan->penerimaan_id,
@@ -189,17 +209,21 @@ class PenerimaanController extends Controller
                     'jml_datang' => $barang['barangDatang'],
                     'jml_kurang' => $barang['jml_kekurangan'],
                     'kondisi' => $barang['kondisi'],
+                    'status' => $barang['status'],
                 ];
             }
+
+            foreach ($stockBarang as $barang) {
+                $barang->save();
+            }
+
             DetailPenerimaanBarang::insert($detailPenerimaan);
-            Log::info('Detail Penerimaan Barang Inserted:', $detailPenerimaan);
 
             $getPembelian = Pembelian::where('po_id', $request->po_id)->first();
-            Log::info("Pembelian Found:" . $getPembelian);
             $getPembelian->update(['status' => 'Received']);
 
             $grn = GoodReceiptNote::create([
-                'grn_id' => 'GRN-' . date('Y') . date('m') . str_pad($countGrn + 1, 5, "0", STR_PAD_LEFT),
+                'grn_id' => 'GRN-' . date('Y') . date('m') . str_pad($countGrn + 1, 5, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999),
                 'penerimaan_id' => $penerimaan->penerimaan_id,
                 'url_file' => '',
             ]);
@@ -214,6 +238,18 @@ class PenerimaanController extends Controller
                 'notes' => $request->note
             ];
             $this->generateGRN($grnData);
+            $isCompleted = true;
+            foreach ($request->barangs as $barang) {
+                if ($barang['status'] == 'Retur') {
+                    $isCompleted = false;
+                    break;
+                }
+            }
+            if ($isCompleted) {
+                $penerimaan->update(['status' => 'Completed']);
+            } else {
+                $penerimaan->update(['status' => 'Pending']);
+            }
         } catch (\Throwable $th) {
             Log::error('Exception Caught:', ['error' => $th->getMessage()]);
             return response()->json([
@@ -228,5 +264,43 @@ class PenerimaanController extends Controller
             'message' => 'Success Create Good Receipt',
             'data' => '',
         ]);
+    }
+
+    public function updateStockPenerimaan(Request $request)
+    {
+        try {
+            $penerimaan = PenerimaanBarang::where('penerimaan_id', $request->barangs[0]['penerimaan_id'])->first();
+            foreach ($request->barangs as $barang) {
+                $detail = DetailPenerimaanBarang::where('detil_penerimaan_id', $barang['detil_penerimaan_id'])->first();
+                $detail->update([
+                    'jml_datang' => $barang['jml_datang'],
+                    'jml_kurang' => $barang['jml_kurang'],
+                    'status' => $barang['status'],
+                ]);
+            }
+            $isCompleted = true;
+            foreach ($request->barangs as $barang) {
+                if ($barang['status'] == 'Retur') {
+                    $isCompleted = false;
+                    break;
+                }
+            }
+
+            if ($isCompleted) {
+                $penerimaan->update(['status' => 'Completed']);
+            } else {
+                $penerimaan->update(['status' => 'Pending']);
+            }
+            return response()->json([
+                'status' => true,
+                'message' => 'Success Update Status',
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('Exception Caught:', ['error' => $th->getMessage()]);
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage(),
+            ]);
+        }
     }
 }

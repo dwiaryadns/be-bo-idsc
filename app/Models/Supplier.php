@@ -14,9 +14,25 @@ class Supplier extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'supplier_id', 'nama_supplier', 'alamat', 'kota', 'provinsi', 'kode_pos', 'negara',
-        'nomor_telepon', 'email', 'website', 'kontak_person', 'nomor_kontak_person', 'email_kontak_person',
-        'tipe_supplier', 'nomor_npwp', 'tanggal_kerjasama', 'catatan_tambahan', 'bisnis_owner_id'
+        'supplier_id',
+        'nama_supplier',
+        'alamat',
+        'kabupaten',
+        'provinsi',
+        'desa',
+        'kecamatan',
+        'kode_pos',
+        'nomor_telepon',
+        'email',
+        'website',
+        'kontak_person',
+        'nomor_kontak_person',
+        'email_kontak_person',
+        'tipe_supplier',
+        'nomor_npwp',
+        'tanggal_kerjasama',
+        'catatan_tambahan',
+        'bisnis_owner_id'
     ];
 
     public function bisnis_owner()

@@ -43,4 +43,11 @@ class PenerimaanBarang extends Model
     {
         return $this->hasMany(DetailPenerimaanBarang::class, 'penerimaan_id', 'penerimaan_id');
     }
+
+    public function detailPending()
+    {
+        return $this->hasMany(DetailPenerimaanBarang::class, 'penerimaan_id', 'penerimaan_id')
+            ->with('barang')
+            ->where('status', 'Retur');
+    }
 }

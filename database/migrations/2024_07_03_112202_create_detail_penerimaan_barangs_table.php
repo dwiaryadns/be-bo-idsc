@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('jml_datang');
             $table->integer('jml_kurang');
             $table->string('kondisi', 100);
+            $table->string('status');
             $table->foreign('penerimaan_id')->references('penerimaan_id')->on('penerimaan_barangs')->onDelete('cascade');
             $table->foreign('barang_id')->references('barang_id')->on('barangs')->onDelete('cascade');
             $table->timestamps();

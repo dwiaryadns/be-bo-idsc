@@ -14,22 +14,23 @@ return new class extends Migration
         Schema::create('suppliers', function (Blueprint $table) {
             $table->string('supplier_id')->primary();
             $table->foreignId('bisnis_owner_id')->constrained()->onDelete('cascade');
-            $table->string('nama_supplier', 255);
-            $table->string('alamat', 255);
-            $table->string('kota', 100);
-            $table->string('provinsi', 100);
-            $table->string('kode_pos', 10);
-            $table->string('negara', 100);
-            $table->string('nomor_telepon', 15);
-            $table->string('email', 100);
-            $table->string('website', 100);
-            $table->string('kontak_person', 100);
-            $table->string('nomor_kontak_person', 15);
-            $table->string('email_kontak_person', 100);
-            $table->string('tipe_supplier', 50);
-            $table->string('nomor_npwp', 20);
+            $table->string('nama_supplier');
+            $table->string('alamat');
+            $table->string('kabupaten');
+            $table->string('provinsi');
+            $table->string('desa');
+            $table->string('kecamatan');
+            $table->string('kode_pos');
+            $table->string('nomor_npwp');
+            $table->string('nomor_telepon');
+            $table->string('email');
+            $table->string('website')->nullable();
+            $table->string('kontak_person');
+            $table->string('nomor_kontak_person');
+            $table->string('email_kontak_person');
+            $table->string('tipe_supplier');
             $table->date('tanggal_kerjasama');
-            $table->text('catatan_tambahan');
+            $table->text('catatan_tambahan')->nullable();
             $table->timestamps();
         });
     }

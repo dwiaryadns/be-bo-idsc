@@ -13,6 +13,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PembelianController;
 use App\Http\Controllers\PenerimaanController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\WarehouseController;
 use Illuminate\Support\Facades\Route;
 
@@ -90,5 +91,12 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::get('/', [PenerimaanController::class, 'penerimaan']);
         Route::get('/search', [PenerimaanController::class, 'showByPoId']);
         Route::post('/save', [PenerimaanController::class, 'save']);
+        Route::post('/update', [PenerimaanController::class, 'updateStockPenerimaan']);
+    });
+
+    Route::prefix('/supplier')->group(function () {
+        Route::get('/', [SupplierController::class, 'getSupplier']);
+        Route::get('/{id}', [SupplierController::class, 'showSupplier']);
+        Route::post('/store', [SupplierController::class, 'storeSupplier']);
     });
 });
