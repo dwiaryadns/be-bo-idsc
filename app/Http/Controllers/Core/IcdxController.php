@@ -16,16 +16,16 @@ class IcdxController extends Controller
 
         $query = Icdx::query();
 
-        $query->selectRaw('id, category, sub_category, en_name, id_name, created_at, updated_at, 
-                      CASE 
-                          WHEN sub_category IS NULL OR sub_category = \'NULL\' THEN category 
-                          ELSE CONCAT(category, \'.\', sub_category) 
-                      END as code');
+        $query->selectRaw("id, category, sub_category, en_name, id_name, created_at, updated_at, 
+                  CASE 
+                      WHEN sub_category IS NULL OR sub_category = 'NULL' THEN category 
+                      ELSE CONCAT(category, '.', sub_category) 
+                  END as code");
 
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $search = strtolower($search);
-                $q->whereRaw('LOWER(CONCAT(category, ".", sub_category)) LIKE ?', ['%' . $search . '%'])
+                $q->whereRaw("LOWER(CONCAT(category, '.', sub_category)) LIKE ?", ['%' . $search . '%'])
                     ->orWhereRaw('LOWER(en_name) LIKE ?', ['%' . $search . '%'])
                     ->orWhereRaw('LOWER(id_name) LIKE ?', ['%' . $search . '%']);
             });
