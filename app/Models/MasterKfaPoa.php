@@ -25,7 +25,6 @@ class MasterKfaPoa extends Model
         'estimate_pack_price'
     ];
 
-    protected $hidden = ['created_at', 'updated_at'];
 
     public function masterKfaPov()
     {

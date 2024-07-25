@@ -5,9 +5,11 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\BoInfoController;
 use App\Http\Controllers\Core\AccessFasyankesController;
+use App\Http\Controllers\Core\IcdxController;
 use App\Http\Controllers\Core\MasterKfaController;
 use App\Http\Controllers\Core\TransaksiController;
 use App\Http\Controllers\FasyankesController;
+use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\LegalDocController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PembelianController;
@@ -46,6 +48,7 @@ Route::middleware('check.token')->group(function () {
     Route::post('/access-fasyankes/store', [AccessFasyankesController::class, 'storeAccessFasyankes']);
     Route::post('/access-fasyankes/update', [AccessFasyankesController::class, 'updateAccessFasyankes']);
     Route::get('/list-username', [AccessFasyankesController::class, 'listUsername']);
+    Route::get('/icdx', [IcdxController::class, 'icdx']);
 
     Route::get('/master-kfa', [MasterKfaController::class, 'index']);
     Route::get('/master-kfa/pov', [MasterKfaController::class, 'kfa_pov']);
@@ -65,6 +68,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::prefix('warehouses')->group(function () {
         Route::get('/', [WarehouseController::class, 'getWarehouses']);
         Route::post('/store', [WarehouseController::class, 'storeWarehouse']);
+        Route::get('/stock-gudang', [WarehouseController::class, 'stockGudang']);
+        Route::post('/update-isjual', [WarehouseController::class, 'updateIsJualBarang']);
     });
     Route::prefix('fasyankes')->group(function () {
         Route::get('/', [FasyankesController::class, 'getFasyankes']);
@@ -97,6 +102,12 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::prefix('/supplier')->group(function () {
         Route::get('/', [SupplierController::class, 'getSupplier']);
         Route::get('/{id}', [SupplierController::class, 'showSupplier']);
+        Route::delete('/delete/{id}', [SupplierController::class, 'deleteSupplier']);
         Route::post('/store', [SupplierController::class, 'storeSupplier']);
+    });
+    Route::prefix('/inventory')->group(function () {
+        Route::get('/get-kategori', [InventoryController::class, 'getKategori']);
+        Route::get('/get-stock-barang', [InventoryController::class, 'getStockBarang']);
+        Route::post('/store-barang', [InventoryController::class, 'storeBarang']);
     });
 });

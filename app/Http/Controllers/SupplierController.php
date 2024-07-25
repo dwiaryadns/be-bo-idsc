@@ -60,7 +60,7 @@ class SupplierController extends Controller
             'provinsi' => 'required',
             'desa' => 'required',
             'kecamatan' => 'required',
-            'kode_pos' => 'required|numerix|min:5',
+            'kode_pos' => 'required|numeric|min:5',
             'nomor_telepon' => 'required|numeric',
             'email' => 'required|email',
             'kontak_person' => 'required',
@@ -68,7 +68,8 @@ class SupplierController extends Controller
             'email_kontak_person' => 'required|email',
             'tipe_supplier' => 'required',
             'nomor_npwp' => 'required',
-            'tanggal_kerjasama' => 'required|date',
+            'start_pks_date' => 'required|date',
+            'end_pks_date' => 'required|date',
         ], [
             'nama_supplier.required' => 'Nama Supplier wajib diisi',
             'alamat.required' => 'Alamat wajib diisi',
@@ -90,8 +91,10 @@ class SupplierController extends Controller
             'email_kontak_person.email' => 'Email PIC harus valid',
             'tipe_supplier.required' => 'Tipe Supplier wajib diisi',
             'nomor_npwp.required' => 'Nomor NPWP wajib diisi',
-            'tanggal_kerjasama.required' => 'Tanggal Kerjasama harus diisi',
-            'tanggal_kerjasama.date' => 'Tanggal Kerjasama harus dalam format tanggal'
+            'start_pks_date.required' => 'Tanggal Kerjsama wajib diisi',
+            'end_pks_date.required' => 'Tanggal Kerjsama wajib diisi',
+            'start_pks_date.date' => 'Tanggal harus dalam format tanggal',
+            'end_pks_date.date' => 'Tanggal harus dalam format tanggal',
         ]);
         if ($validator->fails()) {
             $errors = collect($validator->errors())->map(function ($messages) {
@@ -109,7 +112,7 @@ class SupplierController extends Controller
         $countSupplier = Supplier::count();
         $supplier = Supplier::create([
             'bisnis_owner_id' => $bo->id,
-            'supplier_id' => 'PO-' . date('Y') . date('m') . str_pad($countSupplier + 1, 5, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999),
+            'supplier_id' => 'SUPPID-' . date('Y') . date('m') . str_pad($countSupplier + 1, 5, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999),
             'nama_supplier' => $request->nama_supplier,
             'alamat' => $request->alamat,
             'kabupaten' => $request->kabupaten,
@@ -125,13 +128,38 @@ class SupplierController extends Controller
             'email_kontak_person' => $request->email_kontak_person,
             'tipe_supplier' => $request->tipe_supplier,
             'nomor_npwp' => $request->nomor_npwp,
-            'tanggal_kerjasama' => $request->tanggal_kerjasama,
+            'start_pks_date' => $request->start_pks_date,
+            'end_pks_date' => $request->end_pks_date,
             'catatan_tambahan' => $request->catatan_tambahan,
         ]);
         return response()->json([
             'status' => true,
             'message' => 'Success create supplier',
             'data' => $supplier
+        ], 200);
+    }
+    public function deleteSupplier($supplierId)
+    {
+        $bo = Auth::guard('bisnis_owner')->user();
+        if (!$bo) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User is not authenticated'
+            ], 401);
+        }
+        $supplier = Supplier::where('bisnis_owner_id', $bo->id)
+            ->where('supplier_id', $supplierId)
+            ->first();
+        if (!$supplier) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Supplier not found'
+            ], 404);
+        }
+        $supplier->delete();
+        return response()->json([
+            'status' => true,
+            'message' => 'Success delete supplier'
         ], 200);
     }
 }

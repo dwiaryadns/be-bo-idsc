@@ -29,7 +29,8 @@ return new class extends Migration
             $table->string('nomor_kontak_person');
             $table->string('email_kontak_person');
             $table->string('tipe_supplier');
-            $table->date('tanggal_kerjasama');
+            $table->date('start_pks_date');
+            $table->date('end_pks_date');
             $table->text('catatan_tambahan')->nullable();
             $table->timestamps();
         });

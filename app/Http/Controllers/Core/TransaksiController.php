@@ -67,7 +67,6 @@ class TransaksiController extends Controller
                             ->orWhereRaw('LOWER(deskripsi) LIKE ?', ['%' . strtolower($search) . '%'])
                             ->orWhereHas('kategori_barang', function ($query) use ($search) {
                                 $query->whereRaw('LOWER(nama) LIKE ?', ['%' . strtolower($search) . '%']);
-                                $query->whereRaw('LOWER(nama) LIKE ?', ['%' . strtolower($search) . '%']);
                             });
                     });
             });

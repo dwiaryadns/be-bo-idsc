@@ -58,14 +58,16 @@ class BoInfoController extends Controller
             'city' => 'required',
             'subdistrict' => 'required',
             'village' => 'required',
-            'postal_code' => 'required|numeric|min:5',
+            'postal_code' => 'required|numeric|regex:/^\d{5,}$/',
+        ], [
+            // postal code minmal 5 angka
+            'postal_code.regex'=> 'Postal Code must be at least 5 digits'
         ]);
         if ($validator->fails()) {
             $errors = collect($validator->errors())->map(function ($messages) {
                 return $messages[0];
             });
-            Log::error('Validation failed', $errors->toArray());
-            return response()->json(['status' => false, 'errors' => $errors], 422);
+            return response()->json(['status' => false, 'message' => 'Failed Store Bo Info', 'errors' => $errors], 422);
         }
 
         $user = Auth::guard('bisnis_owner')->user();

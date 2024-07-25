@@ -15,18 +15,22 @@ class PenerimaanBarang extends Model
 
 
     protected $fillable = [
-        'penerimaan_id', 'po_id', 'fasyankes_warehouse_id', 'tanggal_penerimaan', 'status', 'catatan', 'penerima', 'pengirim',
-        'pengecek'
+        'penerimaan_id',
+        'po_id',
+        'fasyankes_warehouse_id',
+        'tanggal_penerimaan',
+        'status',
+        'catatan',
+        'penerima',
+        'pengirim',
+        'pengecek',
+        'warehouse_id',
+        'supplier_invoice'
     ];
 
-    protected $hidden = [
-        'created_at',
-        'updated_at'
-    ];
-
-    public function good_receipt_note()
+    public function good_receipt_notes()
     {
-        return $this->hasOne(GoodReceiptNote::class, 'penerimaan_id', 'penerimaan_id');
+        return $this->hasMany(GoodReceiptNote::class, 'penerimaan_id', 'penerimaan_id');
     }
 
     public function pembelian()
@@ -34,9 +38,9 @@ class PenerimaanBarang extends Model
         return $this->belongsTo(Pembelian::class, 'po_id', 'po_id');
     }
 
-    public function fasyankes_warehouse()
+    public function warehouse()
     {
-        return $this->belongsTo(FasyankesWarehouse::class, 'fasyankes_warehouse_id', 'wfid');
+        return $this->belongsTo(Warehouse::class);
     }
 
     public function detail_penerimaan_barangs()

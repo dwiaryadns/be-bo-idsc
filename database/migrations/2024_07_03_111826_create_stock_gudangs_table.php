@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('stock_barangs', function (Blueprint $table) {
-            $table->string('stok_barang_id')->primary();
-            $table->string('fasyankes_warehouse_id');
+        Schema::create('stock_gudangs', function (Blueprint $table) {
+            $table->string('stock_gudang_id')->primary();
+            $table->foreignId('warehouse_id')->constrained()->onDelete('cascade');
             $table->string('barang_id');
-            $table->integer('stok');
-            // $table->integer('stok_min');
-            $table->foreign('fasyankes_warehouse_id')->references('wfid')->on('fasyankes_warehouse')->onDelete('cascade');
             $table->foreign('barang_id')->references('barang_id')->on('barangs')->onDelete('cascade');
+            $table->integer('stok');
+            $table->boolean('isJual')->default(1);
             $table->timestamps();
         });
     }
@@ -28,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('stock_barangs');
+        Schema::dropIfExists('stock_gudangs');
     }
 };

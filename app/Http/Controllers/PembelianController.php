@@ -20,7 +20,7 @@ class PembelianController extends Controller
     public function getPurchase()
     {
         $purchase = Pembelian::with('detail_pembelians.barang')
-            ->whereRelation('fasyankes_warehouse.fasyankes.bisnis_owner', 'id', Auth::guard('bisnis_owner')->user()->id)
+            ->whereRelation('warehouse.bisnis_owner', 'id', Auth::guard('bisnis_owner')->user()->id)
             ->get();
 
         $data = [];
@@ -30,7 +30,7 @@ class PembelianController extends Controller
                 'tanggal_po' => date('d M Y', strtotime($p->tanggal_po)),
                 'po_name' => $p->po_name,
                 'status' => $p->status,
-                'warehouse' => $p->fasyankes_warehouse->warehouse->name,
+                'warehouse' => $p->warehouse->name,
                 'supplier' => $p->supplier->nama_supplier,
                 'total' => $p->total_harga,
                 'detail' => $p->detail_pembelians
@@ -88,7 +88,13 @@ class PembelianController extends Controller
                 $q->whereRaw('LOWER(supplier_barang_id) LIKE ?', ['%' . strtolower($search) . '%'])
                     ->orWhereRaw('LOWER(barang_id) LIKE ?', ['%' . strtolower($search) . '%'])
                     ->orWhereRaw('LOWER(supplier_barang_id) LIKE ?', ['%' . strtolower($search) . '%'])
-                    ->orWhereRaw('LOWER(harga) LIKE ?', ['%' . strtolower($search) . '%']);
+                    ->orWhereRaw('LOWER(harga) LIKE ?', ['%' . strtolower($search) . '%'])
+                    ->orWhereHas('barang', function ($q) use ($search) {
+                        $q->whereRaw('LOWER(nama_barang) LIKE ?', ['%' . strtolower($search) . '%']);
+                    })
+                    ->orWhereHas('supplier', function ($q) use ($search) {
+                        $q->whereRaw('LOWER(nama_supplier) LIKE ?', ['%' . strtolower($search) . '%']);
+                    });
             });
         }
         $barangs = $query->with('supplier', 'barang.kfa_poa')->whereHas('supplier', function ($q) use ($bo) {
@@ -110,11 +116,11 @@ class PembelianController extends Controller
             'barang' => 'required',
             'barang.*.barang_id' => 'required|string',
             'barang.*.qty' => 'required|numeric',
-            'wfid' => 'required|string',
+            'warehouse_id' => 'required|string',
             'supplier_id' => 'required|string',
             'po_name' => 'required'
         ], [
-            'wfid' => 'The Warehouse field is required',
+            'warehouse_id' => 'The Warehouse field is required',
             'po_name' => 'PO Name is required'
         ]);
 
@@ -134,14 +140,14 @@ class PembelianController extends Controller
             ], 422);
         }
 
-        $wfid = $request->wfid;
-        $checkWfid = FasyankesWarehouse::where('wfid', $wfid)->first();
-        if (!$checkWfid) {
-            return response()->json([
-                'status' => false,
-                'message' => 'WFID not found'
-            ], 404);
-        }
+        // $wfid = $request->wfid;
+        // $checkWfid = FasyankesWarehouse::where('wfid', $wfid)->first();
+        // if (!$checkWfid) {
+        //     return response()->json([
+        //         'status' => false,
+        //         'message' => 'WFID not found'
+        //     ], 404);
+        // }
 
         $barangList = $request->barang;
         $supplierId = $request->supplier_id;
@@ -150,7 +156,7 @@ class PembelianController extends Controller
 
         $totalHarga = 0;
 
-        $countStockBarang = StockBarang::count();
+        // $countStockBarang = StockBarang::count();
         foreach ($barangList as $barangData) {
             $barangID = $barangData['barang_id'];
             $jumlah = $barangData['qty'];
@@ -168,18 +174,18 @@ class PembelianController extends Controller
             $totalHargaBarang = $hargaSatuan * $jumlah;
             $totalHarga += $totalHargaBarang;
 
-            $stockBarang = StockBarang::where('fasyankes_warehouse_id', $wfid)
-                ->where('barang_id', $barangID)
-                ->first();
+            // $stockBarang = StockBarang::where('fasyankes_warehouse_id', $wfid)
+            //     ->where('barang_id', $barangID)
+            //     ->first();
 
-            if (!$stockBarang) {
-                $newStockBarang = new StockBarang();
-                $newStockBarang->stok_barang_id = 'PO-' . date('Y') . date('m') . str_pad($countStockBarang + 1, 5, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999);
-                $newStockBarang->fasyankes_warehouse_id = $wfid;
-                $newStockBarang->barang_id = $barangID;
-                $newStockBarang->stok = $jumlah;
-                $newStockBarang->save();
-            }
+            // if (!$stockBarang) {
+            //     $newStockBarang = new StockBarang();
+            //     $newStockBarang->stok_barang_id = 'PO-' . date('Y') . date('m') . str_pad($countStockBarang + 1, 5, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999);
+            //     $newStockBarang->fasyankes_warehouse_id = $wfid;
+            //     $newStockBarang->barang_id = $barangID;
+            //     $newStockBarang->stok = $jumlah;
+            //     $newStockBarang->save();
+            // }
         }
 
         $countPembelian = Pembelian::count();
@@ -187,7 +193,7 @@ class PembelianController extends Controller
             'po_name' => $request->po_name,
             'po_id' => 'PO-' . date('Y') . date('m') . str_pad($countPembelian + 1, 5, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999),
             'supplier_id' => $supplierId,
-            'fasyankes_warehouse_id' => $wfid,
+            'warehouse_id' => $request->warehouse_id,
             'tanggal_po' => Carbon::now(),
             'status' => 'Order',
             'total_harga' => $totalHarga,
@@ -202,7 +208,6 @@ class PembelianController extends Controller
             $hargaSatuan = $barangDetail->harga_beli;
             $totalHargaBarang = $hargaSatuan * $jumlah;
             $notes = $barangData['notes'];
-
 
             $detailPembelianData[] = [
                 'detil_po_id' => 'DETIL-PO-' . date('Y') . date('m') . str_pad($countPembelian + 1, 3, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999),

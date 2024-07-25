@@ -80,9 +80,9 @@ class PaymentController extends Controller
 
             $urlQr = null;
             if ($acquirer == 'airpay shopee') {
-                $urlQr = "https://api.sandbox.midtrans.com/v2/qris/shopeepay/sppq_" . $transaction->transaction_id . "/qr-code";
+                $urlQr = "https://api.midtrans.com/v2/qris/shopeepay/sppq_" . $transaction->transaction_id . "/qr-code";
             } else if ($acquirer == 'gopay') {
-                $urlQr = "https://api.sandbox.midtrans.com/v2/qris/" . $transaction->transaction_id . "/qr-code";
+                $urlQr = "https://api.midtrans.com/v2/qris/" . $transaction->transaction_id . "/qr-code";
             }
             $vaNumber = isset($notification->va_numbers[0]) ? $notification->va_numbers[0]->va_number : null;
             $bank = isset($notification->va_numbers[0]) ? $notification->va_numbers[0]->bank : null;

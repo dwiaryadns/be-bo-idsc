@@ -14,15 +14,15 @@ return new class extends Migration
         Schema::create('penerimaan_barangs', function (Blueprint $table) {
             $table->string('penerimaan_id')->primary();
             $table->string('po_id');
-            $table->string('fasyankes_warehouse_id');
+            $table->foreignId('warehouse_id')->constrained()->onDelete('cascade');
             $table->date('tanggal_penerimaan');
+            $table->string('supplier_invoice');
             $table->string('status', 50);
             $table->text('catatan');
             $table->string('penerima')->nullable();
             $table->string('pengirim')->nullable();
             $table->string('pengecek')->nullable();
             $table->foreign('po_id')->references('po_id')->on('pembelians')->onDelete('cascade');
-            $table->foreign('fasyankes_warehouse_id')->references('wfid')->on('fasyankes_warehouse')->onDelete('cascade');
             $table->timestamps();
         });
     }

@@ -14,7 +14,14 @@ class Pembelian extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'po_id', 'supplier_id', 'po_name', 'fasyankes_warehouse_id', 'tanggal_po', 'status', 'total_harga', 'catatan'
+        'po_id',
+        'supplier_id',
+        'po_name',
+        'warehouse_id',
+        'tanggal_po',
+        'status',
+        'total_harga',
+        'catatan'
     ];
 
     public function supplier()
@@ -22,9 +29,9 @@ class Pembelian extends Model
         return $this->belongsTo(Supplier::class, 'supplier_id', 'supplier_id');
     }
 
-    public function fasyankes_warehouse()
+    public function warehouse()
     {
-        return $this->belongsTo(FasyankesWarehouse::class, 'fasyankes_warehouse_id', 'wfid');
+        return $this->belongsTo(Warehouse::class);
     }
 
     public function detail_pembelians()

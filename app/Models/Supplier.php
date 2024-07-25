@@ -30,7 +30,8 @@ class Supplier extends Model
         'email_kontak_person',
         'tipe_supplier',
         'nomor_npwp',
-        'tanggal_kerjasama',
+        'start_pks_date',
+        'end_pks_date',
         'catatan_tambahan',
         'bisnis_owner_id'
     ];

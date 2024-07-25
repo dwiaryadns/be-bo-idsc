@@ -15,13 +15,12 @@ return new class extends Migration
             $table->string('po_id')->primary();
             $table->string('supplier_id');
             $table->string('po_name');
-            $table->string('fasyankes_warehouse_id');
             $table->date('tanggal_po');
             $table->string('status', 50);
             $table->decimal('total_harga', 10, 2);
             $table->text('catatan')->nullable();
             $table->foreign('supplier_id')->references('supplier_id')->on('suppliers')->onDelete('cascade');
-            $table->foreign('fasyankes_warehouse_id')->references('wfid')->on('fasyankes_warehouse')->onDelete('cascade');
+            $table->foreignId('warehouse_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

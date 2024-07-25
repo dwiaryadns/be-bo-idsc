@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Dwi Arya Putra',
             'email' => 'test@gmail.com',
             'email_verified_at' => now(),
-            'password' => Hash::make('password')
+            'password' => Hash::make('idsc123*')
         ]);
         $bo->markEmailAsVerified();
 
@@ -33,7 +33,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'teguh',
             'email' => 'teguh@gmail.com',
             'email_verified_at' => now(),
-            'password' => Hash::make('password')
+            'password' => Hash::make('idsc123*')
         ]);
         $bo2->markEmailAsVerified();
 
@@ -107,7 +107,7 @@ class DatabaseSeeder extends Seeder
             'is_active' => 1,
             'created_by' => 'Teguh',
             'role' => 'perawat',
-            'id_profile' => 2
+            'id_profile' => 3
         ]);
         AccessFasyankes::create([
             'fasyankes_id' => '12345678',
@@ -116,7 +116,7 @@ class DatabaseSeeder extends Seeder
             'is_active' => 1,
             'created_by' => 'Teguh',
             'role' => 'dokter',
-            'id_profile' => 3
+            'id_profile' => 2
         ]);
         AccessFasyankes::create([
             'fasyankes_id' => '12345678',
@@ -133,7 +133,8 @@ class DatabaseSeeder extends Seeder
         $this->call(SuppliersSeeder::class);
         $this->call(BarangsSeeder::class);
         $this->call(SupplierBarangsSeeder::class);
-        $this->call(StockBarangsSeeder::class);
+        $this->call(ICDXSeeder::class);
+        // $this->call(StockBarangsSeeder::class);
         // $this->call(PembelianSeeder::class);
         // $this->call(DetailPembelianSeeder::class);
         // $this->call(PenerimaanBarangSeeder::class);

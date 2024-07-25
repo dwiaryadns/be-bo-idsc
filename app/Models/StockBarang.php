@@ -14,7 +14,7 @@ class StockBarang extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'stok_barang_id', 'fasyankes_warehouse_id', 'barang_id', 'stok'
+        'stok_barang_id', 'fasyankes_warehouse_id', 'barang_id', 'stok', 'stok_min'
     ];
 
     public function barang()

@@ -17,11 +17,6 @@ class GoodReceiptNote extends Model
         'url_file',
     ];
 
-    protected $hidden = [
-        'created_at',
-        'updated_at'
-    ];
-
     public function penerimaan()
     {
         return $this->belongsTo(PenerimaanBarang::class, 'penerimaan_id', 'penerimaan_id');

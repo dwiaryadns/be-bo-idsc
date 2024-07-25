@@ -17,9 +17,9 @@ return new class extends Migration
             $table->string('nama_barang');
             $table->string('supplier_id');
             $table->foreign('supplier_id')->references('supplier_id')->on('suppliers')->onDelete('cascade');
-            $table->unsignedBigInteger('kfa_poa_code')->nullable(); 
+            $table->unsignedBigInteger('kfa_poa_code')->nullable();
             $table->foreign('kategori_id')->references('kategori_id')->on('kategori_barang_apoteks')->onDelete('cascade');
-        $table->foreign('kfa_poa_code')->references('kfa_poa_code')->on('master_kfa_poas')->onDelete('cascade');
+            $table->foreign('kfa_poa_code')->references('kfa_poa_code')->on('master_kfa_poas')->onDelete('cascade');
             $table->string('satuan');
             $table->decimal('harga_beli', 10, 2);
             $table->decimal('harga_jual', 10, 2);

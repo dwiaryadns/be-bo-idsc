@@ -46,14 +46,14 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>GRN Number: {{ $grnData['grn_id'] }}</h1>
-            <p>Tanggal Penerimaan: {{ date('d M Y',strtotime($grnData['tanggal_penerimaan'])) }}</p>
+            <h1>{{ $grnData['grn_id'] }}</h1>
+            <p>Tanggal Penerimaan: {{ date('d M Y H:i',strtotime($grnData['tanggal_penerimaan'])) }}</p>
         </div>
         <div class="details">
             <table>
                 <tr>
-                    <th style="background-color: #0763EC; color: white">Supplier Information</th>
-                    <th style="background-color: #0763EC; color: white">Delivery Information</th>
+                    <th style="background-color: #0763EC; color: white">Penerima</th>
+                    <th style="background-color: #0763EC; color: white">Pengirim</th>
                 </tr>
                 <tr>
                     <td>
@@ -74,11 +74,11 @@
             </table>
         </div>
         <div class="received-by">
-            <p>Received by: {{ $grnData['penerima'] }} </p>
-            <p>Checked by: {{ $grnData['pengecek'] }} </p>
+            <p>Diterima Oleh : {{ $grnData['penerima'] }} </p>
+            <p>Dicek Oleh : {{ $grnData['pengecek'] }} </p>
         </div>
         <div class="items">
-            <h2>RECEIVED ITEMS</h2>
+            <h2>Barang</h2>
             <table>
                 <thead>
                     <tr>

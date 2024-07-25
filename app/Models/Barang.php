@@ -14,10 +14,17 @@ class Barang extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'barang_id', 'kfa_poa_code', 'nama_barang', 'kategori_id', 'satuan', 'harga_beli', 'harga_jual', 'deskripsi', 'supplier_id'
-    ];
-    protected $hidden = ['created_at', 'updated_at'];
-
+        'barang_id',
+        'kfa_poa_code',
+        'nama_barang',
+        'kategori_id',
+        'satuan',
+        'harga_beli',
+        'harga_jual',
+        'deskripsi',
+        'expired_at',
+        'supplier_id',
+];
 
     public function supplier()
     {
