@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('fasyankes_warehouse', function (Blueprint $table) {
             $table->string('wfid')->primary();
-            $table->unsignedBigInteger('fasyankes_id');
+            $table->string('fasyankes_id');
             $table->foreign('fasyankes_id')->references('fasyankesId')->on('fasyankes')->onDelete('cascade');
             $table->foreignId('warehouse_id')->constrained()->onDelete('cascade');
             $table->timestamps();

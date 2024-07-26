@@ -178,14 +178,14 @@ class LegalDocController extends Controller
 
             Log::info('Legal document created successfully');
             return response()->json([
-                'message' => 'Upload Legal Document Successfully',
+                'message' => 'Upload Dokument Legal Berhasil',
                 'files' => $uploadedFileUrls,
                 'legal_doc' => $legalDoc,
             ], 200);
         } catch (\Exception $e) {
             Log::error('Error uploading and encrypting files: ' . $e->getMessage());
             return response()->json([
-                'message' => 'Upload Legal Document Failed',
+                'message' => 'Upload Legal Document Gagal',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -223,14 +223,14 @@ class LegalDocController extends Controller
 
             Log::info('Legal document created successfully for Fasyankes');
             return response()->json([
-                'message' => 'Upload Legal Document Successfully',
+                'message' => 'Upload Dokumen Legal Berhasil',
                 'files' => $uploadedFileUrls,
                 'legal_doc' => $legalDoc,
             ], 200);
         } catch (\Exception $e) {
             Log::error('Error uploading and encrypting files for Fasyankes: ' . $e->getMessage());
             return response()->json([
-                "message" => "Upload Legal Document Failed",
+                "message" => "Upload Dokumen Legal Gagal",
                 'error' => $e->getMessage(),
             ], 500);
         }

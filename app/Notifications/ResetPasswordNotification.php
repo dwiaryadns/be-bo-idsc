@@ -21,7 +21,7 @@ class ResetPasswordNotification extends Notification
 
     public function toMail($notifiable)
     {
-        $frontendUrl = "http://103.172.205.204:8080" . "/reset-password?token=" . $this->token;
+        $frontendUrl = "https://my.idsmartcare.com" . "/reset-password?token=" . $this->token;
 
         return (new MailMessage)
             ->line('You are receiving this email because we received a password reset request for your account.')

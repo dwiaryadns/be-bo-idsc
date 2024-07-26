@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('legal_doc_fasyankes', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('fasyankes_id');
+            $table->string('fasyankes_id');
             $table->foreign('fasyankes_id')->references('fasyankesId')->on('fasyankes')->onDelete('cascade');
             $table->string('sia')->nullable();
             $table->string('sipa')->nullable();

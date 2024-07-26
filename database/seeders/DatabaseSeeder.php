@@ -134,7 +134,7 @@ class DatabaseSeeder extends Seeder
         $this->call(BarangsSeeder::class);
         $this->call(SupplierBarangsSeeder::class);
         $this->call(ICDXSeeder::class);
-        // $this->call(StockBarangsSeeder::class);
+        $this->call(StockBarangsSeeder::class);
         // $this->call(PembelianSeeder::class);
         // $this->call(DetailPembelianSeeder::class);
         // $this->call(PenerimaanBarangSeeder::class);

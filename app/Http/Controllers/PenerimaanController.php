@@ -7,9 +7,7 @@ use App\Models\DetailPenerimaanBarang;
 use App\Models\GoodReceiptNote;
 use App\Models\Pembelian;
 use App\Models\PenerimaanBarang;
-use App\Models\StockBarang;
 use App\Models\StockGudang;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -301,7 +299,6 @@ class PenerimaanController extends Controller
                 $detail->update([
                     'jml_datang' => $barang['jml_datang'],
                     'jml_kurang' => $barang['jml_kurang'],
-                    'kondisi' => $barang['kondisi'],
                     'status' => $status,
                 ]);
                 $barangs[] = [

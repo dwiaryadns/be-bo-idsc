@@ -12,6 +12,7 @@ class Fasyankes extends Model
     protected $table = 'fasyankes';
     protected $primaryKey = 'fasyankesId';
     public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
         'fasyankesId',

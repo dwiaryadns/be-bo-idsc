@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('distribusis', function (Blueprint $table) {
             $table->string('distribusi_id')->primary();
+            $table->foreignId('warehouse_id')->constrained()->onDelete('cascade');
+            $table->string('fasyankes_id');
+            $table->foreign('fasyankes_id')->references('fasyankesId')->on('fasyankes')->onDelete('cascade');
+            $table->date('date');
+            $table->string('status');
+            $table->string('keterangan')->nullable();
             $table->timestamps();
         });
     }

@@ -8,6 +8,7 @@ use App\Http\Controllers\Core\AccessFasyankesController;
 use App\Http\Controllers\Core\IcdxController;
 use App\Http\Controllers\Core\MasterKfaController;
 use App\Http\Controllers\Core\TransaksiController;
+use App\Http\Controllers\DistribusiController;
 use App\Http\Controllers\FasyankesController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\LegalDocController;
@@ -109,5 +110,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::get('/get-kategori', [InventoryController::class, 'getKategori']);
         Route::get('/get-stock-barang', [InventoryController::class, 'getStockBarang']);
         Route::post('/store-barang', [InventoryController::class, 'storeBarang']);
+    });
+    Route::prefix('/distribusi')->group(function () {
+        Route::get('/', [DistribusiController::class, 'getDistribusi']);
     });
 });
