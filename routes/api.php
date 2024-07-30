@@ -108,10 +108,13 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     });
     Route::prefix('/inventory')->group(function () {
         Route::get('/get-kategori', [InventoryController::class, 'getKategori']);
+        Route::get('/get-barang', [InventoryController::class, 'getBarang']);
         Route::get('/get-stock-barang', [InventoryController::class, 'getStockBarang']);
         Route::post('/store-barang', [InventoryController::class, 'storeBarang']);
     });
     Route::prefix('/distribusi')->group(function () {
         Route::get('/', [DistribusiController::class, 'getDistribusi']);
+        Route::get('/get-barang', [DistribusiController::class, 'getBarangGudang']);
+        Route::post('/store', [DistribusiController::class, 'store']);
     });
 });

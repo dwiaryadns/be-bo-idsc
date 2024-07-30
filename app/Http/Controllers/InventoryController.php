@@ -8,7 +8,6 @@ use App\Models\StockBarang;
 use App\Models\SupplierBarang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class InventoryController extends Controller
@@ -25,6 +24,47 @@ class InventoryController extends Controller
         );
     }
 
+    public function getBarang(Request $request)
+    {
+        $bo = Auth::guard('bisnis_owner')->user();
+        if (!$bo) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User is not authenticated'
+            ], 401);
+        }
+
+        $perPage = $request->get('per_page', 10);
+        $page = $request->get('page', 1);
+        $search = $request->get('search', '');
+        $query = Barang::query();
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->whereRaw('LOWER(nama_barang) LIKE ?', ['%' . strtolower($search) . '%'])
+                    ->orWhereRaw('LOWER(barang_id) LIKE ?', ['%' . strtolower($search) . '%'])
+                    ->orWhereRaw('LOWER(satuan) LIKE ?', ['%' . strtolower($search) . '%'])
+                    ->orWhere('harga_beli', 'like', "%{$search}%")
+                    ->orWhereHas('supplier', function ($r) use ($search) {
+                        $r->whereRaw('LOWER(nama_supplier) LIKE ?', ['%' . strtolower($search) . '%']);
+                    });
+            });
+        }
+
+        $barangs = $query->with([
+            'supplier' => function ($q) {
+                $q->select('supplier_id', 'nama_supplier');
+            }, 'kategori_barang',
+        ])->whereHas('supplier', function ($q) use ($bo) {
+            $q->where('bisnis_owner_id', $bo->id);
+        })->paginate($perPage, ['*'], 'page', $page);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Success Get Supplier Barang',
+            'data' => $barangs
+        ], 200);
+    }
+
     public function getStockBarang(Request $request)
     {
         $bo = Auth::guard('bisnis_owner')->user();
@@ -38,11 +78,11 @@ class InventoryController extends Controller
         $perPage = $request->get('per_page', 10);
         $page = $request->get('page', 1);
         $search = $request->get('search', '');
+        $fasyankesId = $request->get('fasyankesId', '');
         $query = StockBarang::query();
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->whereRaw('LOWER(barang_id) LIKE ?', ['%' . strtolower($search) . '%'])
-                    ->orWhereRaw('LOWER(stok) LIKE ?', ['%' . strtolower($search) . '%'])
                     ->orWhereHas('barang', function ($q) use ($search) {
                         $q->whereRaw('LOWER(nama_barang) LIKE ?', ['%' . strtolower($search) . '%']);
                     })
@@ -51,10 +91,25 @@ class InventoryController extends Controller
                     });
             });
         }
-        $barangs = $query->with('barang.supplier')->whereHas('barang.supplier', function ($q) use ($bo) {
+        if ($fasyankesId) {
+            $query->whereHas('fasyankes_warehouse.fasyankes', function ($q) use ($fasyankesId) {
+                $q->where('fasyankesId', $fasyankesId);
+            });
+        }
+
+        $barangs = $query->with([
+            'barang' => function ($q) {
+                $q->select('barang_id', 'nama_barang', 'supplier_id', 'harga_beli', 'harga_jual', 'satuan'); // Tambahkan 'supplier_id'
+            },
+            'barang.supplier' => function ($q) {
+                $q->select('supplier_id', 'nama_supplier');
+            },
+            'fasyankes_warehouse.fasyankes' => function ($q) {
+                $q->select('fasyankesId', 'name');
+            }
+        ])->whereHas('barang.supplier', function ($q) use ($bo) {
             $q->where('bisnis_owner_id', $bo->id);
         })->paginate($perPage, ['*'], 'page', $page);
-        Log::info($barangs);
 
         return response()->json([
             'status' => true,
@@ -73,8 +128,6 @@ class InventoryController extends Controller
             'harga_jual' => 'required',
             'satuan' => 'required',
             'expired_at' => 'required|date',
-            'stok' => 'required|numeric',
-            'stok_min' => 'required|numeric',
             'deskripsi' => 'required'
         ], [
             'nama_barang.required' => 'Nama Barang harus diisi',
@@ -84,11 +137,7 @@ class InventoryController extends Controller
             'harga_jual.required' => 'Harga Jual harus diisi',
             'satuan.required' => 'Satuan harus diisi',
             'expired_at.required' => 'Tanggal Kadaluwarsa harus diisi',
-            'stok.required' => 'Stok Awal harus diisi',
-            'stok_min.required' => 'Stok Minimum harus diisi',
             'deskripsi.required' => 'Deskripsi barang harus diisi',
-            'stok.numeric' => 'Stok Awal harus berupa angka',
-            'stok_min.numeric' => 'Stok Minimum harus berupa angka',
             'expired_at.date' => 'Tanggal kadaluwarsa harus tanggal',
         ]);
         if ($validator->fails()) {
@@ -104,5 +153,29 @@ class InventoryController extends Controller
                 422
             );
         }
+        $barang = Barang::create([
+            'barang_id' => 'BID-' . date('Y') . date('m') . str_pad(Barang::count() + 1, 5, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999),
+            'nama_barang' => $request->nama_barang,
+            'kategori_id' => $request->kategori_id,
+            'supplier_id' => $request->supplier_id,
+            'harga_beli' => $request->harga_beli,
+            'harga_jual' => $request->harga_jual,
+            'satuan' => $request->satuan,
+            'expired_at' => $request->expired_at,
+            'deskripsi' => $request->deskripsi
+        ]);
+
+        // 'supplier_barang_id', 'supplier_id', 'barang_id', 'harga'
+
+        SupplierBarang::create([
+            'supplier_barang_id' => 'SBID-' . date('Y') . date('m') . str_pad(SupplierBarang::count() + 1, 5, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999),
+            'supplier_id' => $request->supplier_id,
+            'barang_id' => $barang->barang_id,
+            'harga' => $request->harga_beli,
+        ]);
+        return response()->json([
+            'status' => true,
+            'message' => 'Berhasil Menambah Barang'
+        ]);
     }
 }

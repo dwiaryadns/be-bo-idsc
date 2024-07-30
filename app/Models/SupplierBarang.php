@@ -14,7 +14,7 @@ class SupplierBarang extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'supplier_barang_id', 'supplier_id', 'barang_id', 'harga', 'tanggal_mulai', 'tanggal_berakhir'
+        'supplier_barang_id', 'supplier_id', 'barang_id', 'harga'
     ];
 
     public function supplier()

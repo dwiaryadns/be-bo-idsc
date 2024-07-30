@@ -13,43 +13,33 @@ class SupplierBarangsSeeder extends Seeder
         $supplierBarangs = [
             [
                 'supplier_barang_id' => 'SUPPLIERBARANG00001',
-                'supplier_id' => 'SUPPLIER00001', // Sesuaikan dengan supplier_id yang ada di tabel suppliers
-                'barang_id' => 'BARANG00001', // Sesuaikan dengan barang_id yang ada di tabel barangs
+                'supplier_id' => 'SUPPLIER00001',
+                'barang_id' => 'BARANG00001',
                 'harga' => 12000.00,
-                'tanggal_mulai' => '2020-01-01',
-                'tanggal_berakhir' => '2021-01-01'
             ],
             [
                 'supplier_barang_id' => 'SUPPLIERBARANG00002',
-                'supplier_id' => 'SUPPLIER00001', // Sesuaikan dengan supplier_id yang ada di tabel suppliers
-                'barang_id' => 'BARANG00002', // Sesuaikan dengan barang_id yang ada di tabel barangs
+                'supplier_id' => 'SUPPLIER00001',
+                'barang_id' => 'BARANG00002',
                 'harga' => 55000.00,
-                'tanggal_mulai' => '2020-02-01',
-                'tanggal_berakhir' => '2021-02-01'
             ],
             [
                 'supplier_barang_id' => 'SUPPLIERBARANG00003',
-                'supplier_id' => 'SUPPLIER00002', // Sesuaikan dengan supplier_id yang ada di tabel suppliers
-                'barang_id' => 'BARANG00003', // Sesuaikan dengan barang_id yang ada di tabel barangs
+                'supplier_id' => 'SUPPLIER00002',
+                'barang_id' => 'BARANG00003',
                 'harga' => 16000.00,
-                'tanggal_mulai' => '2020-03-01',
-                'tanggal_berakhir' => '2021-03-01'
             ],
             [
                 'supplier_barang_id' => 'SUPPLIERBARANG00004',
-                'supplier_id' => 'SUPPLIER00002', // Sesuaikan dengan supplier_id yang ada di tabel suppliers
-                'barang_id' => 'BARANG00004', // Sesuaikan dengan barang_id yang ada di tabel barangs
+                'supplier_id' => 'SUPPLIER00002',
+                'barang_id' => 'BARANG00004',
                 'harga' => 21000.00,
-                'tanggal_mulai' => '2020-04-01',
-                'tanggal_berakhir' => '2021-04-01'
             ],
             [
                 'supplier_barang_id' => 'SUPPLIERBARANG00005',
-                'supplier_id' => 'SUPPLIER00003', // Sesuaikan dengan supplier_id yang ada di tabel suppliers
-                'barang_id' => 'BARANG00005', // Sesuaikan dengan barang_id yang ada di tabel barangs
+                'supplier_id' => 'SUPPLIER00003',
+                'barang_id' => 'BARANG00005',
                 'harga' => 52000.00,
-                'tanggal_mulai' => '2020-05-01',
-                'tanggal_berakhir' => '2021-05-01'
             ],
         ];
 

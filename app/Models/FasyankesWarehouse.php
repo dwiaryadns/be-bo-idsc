@@ -12,6 +12,9 @@ class FasyankesWarehouse extends Model
     protected $table = 'fasyankes_warehouse';
     protected $primaryKey = 'wfid';
     public $incrementing = false;
+
+    protected $keyType = 'string';
+
     protected $fillable = [
         'wfid',
         'fasyankes_id',

@@ -24,7 +24,7 @@ class Barang extends Model
         'deskripsi',
         'expired_at',
         'supplier_id',
-];
+    ];
 
     public function supplier()
     {
