@@ -26,4 +26,13 @@ class StockBarang extends Model
     {
         return $this->belongsTo(FasyankesWarehouse::class, 'fasyankes_warehouse_id', 'wfid');
     }
+    public function stok_opname()
+    {
+        return $this->hasMany(StokOpname::class, 'stok_barang_id', 'stok_barang_id');
+    }
+    public function latestStokOpname()
+    {
+        return $this->hasOne(StokOpname::class, 'stok_barang_id', 'stok_barang_id')
+            ->latest('created_at');
+    }
 }

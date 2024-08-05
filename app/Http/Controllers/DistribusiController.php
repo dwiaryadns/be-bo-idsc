@@ -76,7 +76,7 @@ class DistribusiController extends Controller
             $query->where('warehouse_id', $warehouseId);
         }
 
-        $query->whereHas('warehouse', function ($q) use ($bo) {
+        $query->where('isJual', 1)->whereHas('warehouse', function ($q) use ($bo) {
             $q->where('bisnis_owner_id', $bo->id);
         });
 

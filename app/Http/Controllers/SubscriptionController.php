@@ -53,7 +53,7 @@ class SubscriptionController extends Controller
                 'amount' => 'Rp ' .  number_format($transaction->gross_amount, 2, ',', '.'),
                 'transaction_time' => date('d M Y H:i', strtotime($transaction->transaction_time)),
                 'payment_type' => $payment_type,
-                'status' => $transaction->transaction_status,
+                'status' =>  ucfirst($transaction->transaction_status),
                 'fasyankes' => $fasyankes,
                 'plan' => $plan . ' ' . $duration,
                 'qr_code' => $transaction->payment->url_qr,

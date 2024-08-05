@@ -24,7 +24,6 @@ class AccessFasyankes extends Model
     {
         return $this->belongsTo(Fasyankes::class, 'fasyankes_id', 'fasyankesId');
     }
-
     public function wfid($fasyankes_id)
     {
         $fasyankesWarehouse = FasyankesWarehouse::where('fasyankes_id', $fasyankes_id)->first();

@@ -15,6 +15,7 @@ use App\Http\Controllers\LegalDocController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PembelianController;
 use App\Http\Controllers\PenerimaanController;
+use App\Http\Controllers\StokOpnameController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\WarehouseController;
@@ -45,10 +46,11 @@ Route::post('/password/reset', [ResetPasswordController::class, 'resetPassword']
 
 
 Route::middleware('check.token')->group(function () {
+    Route::get('/list-username', [AccessFasyankesController::class, 'listUsername']);
     Route::post('/access-fasyankes', [AccessFasyankesController::class, 'checkAccessFasyankes']);
     Route::post('/access-fasyankes/store', [AccessFasyankesController::class, 'storeAccessFasyankes']);
     Route::post('/access-fasyankes/update', [AccessFasyankesController::class, 'updateAccessFasyankes']);
-    Route::get('/list-username', [AccessFasyankesController::class, 'listUsername']);
+
     Route::get('/icdx', [IcdxController::class, 'icdx']);
 
     Route::get('/master-kfa', [MasterKfaController::class, 'index']);
@@ -111,6 +113,13 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::get('/get-barang', [InventoryController::class, 'getBarang']);
         Route::get('/get-stock-barang', [InventoryController::class, 'getStockBarang']);
         Route::post('/store-barang', [InventoryController::class, 'storeBarang']);
+        Route::post('/import-barang', [InventoryController::class, 'importBarang']);
+    });
+
+    Route::prefix('/stok-opname')->group(function () {
+        Route::get('/barang', [StokOpnameController::class, 'barang']);
+        Route::get('/histori', [StokOpnameController::class, 'getStokOpname']);
+        Route::post('/store', [StokOpnameController::class, 'storeOpname']);
     });
     Route::prefix('/distribusi')->group(function () {
         Route::get('/', [DistribusiController::class, 'getDistribusi']);

@@ -31,4 +31,15 @@ class StockGudang extends Model
     {
         return $this->belongsTo(Barang::class, 'barang_id', 'barang_id');
     }
+
+    public function stok_opname()
+    {
+        return $this->hasMany(StokOpname::class, 'stock_gudang_id', 'stock_gudang_id');
+    }
+    public function latestStokOpname()
+    {
+        return $this->hasOne(StokOpname::class, 'stock_gudang_id', 'stock_gudang_id')
+            ->latest('created_at');
+    }
+    
 }
