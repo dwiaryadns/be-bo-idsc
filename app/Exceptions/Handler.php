@@ -32,14 +32,14 @@ class Handler extends ExceptionHandler
         });
 
         $this->renderable(function (Throwable $e, $request) {
-        // if ($e instanceof \Exception) {
-        //     return new JsonResponse([
-        //         'status' => false,
-        //         'message' => 'Terjadi kesalahan pada server.',
-        //         'error' => $e->getTrace(),
-        //     ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        // }
-        // Log::info($e);
+            if ($e instanceof \Exception) {
+                return new JsonResponse([
+                    'status' => false,
+                    'message' => 'Terjadi kesalahan pada server.',
+                    'error' => $e->getTrace(),
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+            Log::info($e);
         });
     }
 }
