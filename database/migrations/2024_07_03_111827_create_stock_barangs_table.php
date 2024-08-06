@@ -16,9 +16,10 @@ return new class extends Migration
             $table->string('fasyankes_warehouse_id');
             $table->string('barang_id');
             $table->integer('stok');
-            // $table->integer('stok_min');
+            $table->integer('stok_min')->nullable();
             $table->foreign('fasyankes_warehouse_id')->references('wfid')->on('fasyankes_warehouse')->onDelete('cascade');
             $table->foreign('barang_id')->references('barang_id')->on('barangs')->onDelete('cascade');
+            $table->decimal('harga_jual', 10, 2)->default(0)->nullable();
             $table->timestamps();
         });
     }

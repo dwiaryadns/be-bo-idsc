@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,7 +15,12 @@ class StockBarang extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'stok_barang_id', 'fasyankes_warehouse_id', 'barang_id', 'stok', 'stok_min'
+        'stok_barang_id',
+        'fasyankes_warehouse_id',
+        'barang_id',
+        'stok',
+        'stok_min',
+        'harga_jual'
     ];
 
     public function barang()
@@ -34,5 +40,11 @@ class StockBarang extends Model
     {
         return $this->hasOne(StokOpname::class, 'stok_barang_id', 'stok_barang_id')
             ->latest('created_at');
+    }
+
+    public function diskon()
+    {
+        return $this->hasOne(Diskon::class, 'stok_barang_id', 'stok_barang_id')
+            ->where('expired_disc', '>=', Carbon::now());
     }
 }

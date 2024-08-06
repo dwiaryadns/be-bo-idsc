@@ -6,8 +6,10 @@ namespace Database\Seeders;
 use App\Models\AccessFasyankes;
 use App\Models\BisnisOwner;
 use App\Models\BoInfo;
+use App\Models\Diskon;
 use App\Models\Fasyankes;
 use App\Models\Warehouse;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -140,5 +142,6 @@ class DatabaseSeeder extends Seeder
         // $this->call(PenerimaanBarangSeeder::class);
         // $this->call(DetailPenerimaanBarangSeeder::class);
         // $this->call(GoodReceiptNoteSeeder::class);
+        $this->call(DiskonSeeder::class);
     }
 }

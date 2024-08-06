@@ -72,10 +72,24 @@ class TransaksiController extends Controller
             });
         }
 
-        $barangs = $query->with('barang', 'barang.kategori_barang', 'barang.kfa_poa.masterKfaPov.masterKfa')
-            ->select('stok_barang_id', 'fasyankes_warehouse_id', 'barang_id', 'stok')
+        $barangs = $query->with(
+            [
+                'barang',
+                'barang.kategori_barang',
+                'barang.kfa_poa.masterKfaPov.masterKfa',
+                'diskon' => function ($q) {
+                    $q->select('stok_barang_id', 'type', 'percent_disc', 'amount_disc', 'expired_disc');
+                },
+            ]
+        )
+            ->select('stok_barang_id', 'fasyankes_warehouse_id', 'barang_id', 'stok', 'harga_jual')
             ->where('fasyankes_warehouse_id', $wfid)
             ->paginate($perPage, ['*'], 'page', $page);
+        $barangs->getCollection()->transform(function ($item) {
+            $item->barang->harga_jual = $item->harga_jual;
+            unset($item->harga_jual);
+            return $item;
+        });
 
         return response()->json([
             'status' => true,
@@ -122,7 +136,7 @@ class TransaksiController extends Controller
         $stockBarangs = StockBarang::where('fasyankes_warehouse_id', $wfid)
             ->whereIn('barang_id', $barangIds)
             ->get()
-            ->keyBy('barang_id'); 
+            ->keyBy('barang_id');
         foreach ($barangList as $barangData) {
             $barangID = $barangData['barang_id'];
             $jumlah = $barangData['qty'];
