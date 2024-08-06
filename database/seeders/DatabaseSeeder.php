@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
     {
 
         $bo = BisnisOwner::create([
-            'name' => 'Dwi Arya Putra',
+            'name' => 'Ngab Dwi',
             'email' => 'test@gmail.com',
             'email_verified_at' => now(),
             'password' => Hash::make('idsc123*')
@@ -32,7 +32,7 @@ class DatabaseSeeder extends Seeder
 
 
         $bo2 = BisnisOwner::create([
-            'name' => 'teguh',
+            'name' => 'Teguh',
             'email' => 'teguh@gmail.com',
             'email_verified_at' => now(),
             'password' => Hash::make('idsc123*')
@@ -128,6 +128,15 @@ class DatabaseSeeder extends Seeder
             'created_by' => 'Teguh',
             'role' => 'farmasi',
             'id_profile' => 4
+        ]);
+        AccessFasyankes::create([
+            'fasyankes_id' => '12345678',
+            'username' => 'kasir_coba',
+            'password' => Hash::make('Coba123*#'),
+            'is_active' => 1,
+            'created_by' => 'Teguh',
+            'role' => 'kasir',
+            'id_profile' => 5
         ]);
 
         $this->call(KfaSeeder::class);
