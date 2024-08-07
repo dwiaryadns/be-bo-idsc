@@ -8,6 +8,7 @@ use App\Models\FasyankesWarehouse;
 use App\Models\Pembelian;
 use App\Models\StockBarang;
 use App\Models\SupplierBarang;
+use App\Models\Warehouse;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -140,15 +141,6 @@ class PembelianController extends Controller
             ], 422);
         }
 
-        // $wfid = $request->wfid;
-        // $checkWfid = FasyankesWarehouse::where('wfid', $wfid)->first();
-        // if (!$checkWfid) {
-        //     return response()->json([
-        //         'status' => false,
-        //         'message' => 'WFID not found'
-        //     ], 404);
-        // }
-
         $barangList = $request->barang;
         $supplierId = $request->supplier_id;
 
@@ -156,7 +148,6 @@ class PembelianController extends Controller
 
         $totalHarga = 0;
 
-        // $countStockBarang = StockBarang::count();
         foreach ($barangList as $barangData) {
             $barangID = $barangData['barang_id'];
             $jumlah = $barangData['qty'];
@@ -173,27 +164,15 @@ class PembelianController extends Controller
             $hargaSatuan = $barangDetail->harga_beli;
             $totalHargaBarang = $hargaSatuan * $jumlah;
             $totalHarga += $totalHargaBarang;
-
-            // $stockBarang = StockBarang::where('fasyankes_warehouse_id', $wfid)
-            //     ->where('barang_id', $barangID)
-            //     ->first();
-
-            // if (!$stockBarang) {
-            //     $newStockBarang = new StockBarang();
-            //     $newStockBarang->stok_barang_id = 'PO-' . date('Y') . date('m') . str_pad($countStockBarang + 1, 5, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999);
-            //     $newStockBarang->fasyankes_warehouse_id = $wfid;
-            //     $newStockBarang->barang_id = $barangID;
-            //     $newStockBarang->stok = $jumlah;
-            //     $newStockBarang->save();
-            // }
         }
+        $getWarehouse = Warehouse::where('id', $request->warehouse_id)->first();
 
         $countPembelian = Pembelian::count();
         $pembelian = Pembelian::create([
             'po_name' => $request->po_name,
             'po_id' => 'PO-' . date('Y') . date('m') . str_pad($countPembelian + 1, 5, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999),
             'supplier_id' => $supplierId,
-            'warehouse_id' => $request->warehouse_id,
+            'warehouse_id' => $getWarehouse->id,
             'tanggal_po' => Carbon::now(),
             'status' => 'Order',
             'total_harga' => $totalHarga,
@@ -221,6 +200,7 @@ class PembelianController extends Controller
         }
         DetailPembelian::insert($detailPembelianData);
 
+        log_activity("Pemesanan Barang untuk $getWarehouse->name", "Pemesanan Barang", Auth::guard('bisnis_owner')->user()->name, 1);
         return response()->json([
             'status' => true,
             'message' => 'Purchase Successfully',

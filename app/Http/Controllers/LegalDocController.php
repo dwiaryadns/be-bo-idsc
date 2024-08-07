@@ -177,6 +177,7 @@ class LegalDocController extends Controller
             ]);
 
             Log::info('Legal document created successfully');
+            log_activity("Upload Dokumen Legal Bisnis Owner", "Dokumen Legal", Auth::guard('bisnis_owner')->user()->name,1);
             return response()->json([
                 'message' => 'Upload Dokument Legal Berhasil',
                 'files' => $uploadedFileUrls,
@@ -197,7 +198,7 @@ class LegalDocController extends Controller
         $validation = $this->validateFiles($request, $request->type);
         if ($validation instanceof \Illuminate\Http\JsonResponse) {
             Log::info('Validation errors in uploadLegalFasyankes method');
-            return $validation; // Return validation errors response
+            return $validation;
         }
         $getFasyankes = Fasyankes::where('fasyankesId', $request->fasyankes_id)->first();
         if (empty($getFasyankes)) {
@@ -221,7 +222,7 @@ class LegalDocController extends Controller
                 'siok' => $uploadedFileUrls['siok'] ?? null,
             ]);
 
-            Log::info('Legal document created successfully for Fasyankes');
+            log_activity('Upload Dokumen Legal Fasyankes', "Fasyankes", Auth::guard('bisnis_owner')->user()->name,1);
             return response()->json([
                 'message' => 'Upload Dokumen Legal Berhasil',
                 'files' => $uploadedFileUrls,

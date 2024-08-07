@@ -8,6 +8,7 @@ use App\Models\GoodReceiptNote;
 use App\Models\Pembelian;
 use App\Models\PenerimaanBarang;
 use App\Models\StockGudang;
+use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -167,7 +168,7 @@ class PenerimaanController extends Controller
 
         try {
             DB::beginTransaction();
-
+            $getWarehouse = Warehouse::where('id', $request->warehouse_id)->first();
             $countPenerimaan = PenerimaanBarang::count();
             $countGrn = GoodReceiptNote::count();
             Log::info('Request Data:', $request->all());
@@ -176,7 +177,7 @@ class PenerimaanController extends Controller
                 'penerimaan_id' => 'PEN-' . date('Y') . date('m') . str_pad($countPenerimaan + 1, 4, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999),
                 'po_id' => $request->po_id,
                 'supplier_invoice' => $request->supplier_invoice,
-                'warehouse_id' => $request->warehouse_id,
+                'warehouse_id' => $getWarehouse->id,
                 'tanggal_penerimaan' => $request->tanggal,
                 'status' => 'Pending',
                 'penerima' => $request->penerima,
@@ -188,12 +189,13 @@ class PenerimaanController extends Controller
             $detailPenerimaan = [];
             $barangIds = array_column($request->barangs, 'barang_id');
             $countStockBarang = StockGudang::count();
-            $stockBarang = StockGudang::where('warehouse_id', $request->warehouse_id)
+            $stockBarang = StockGudang::where('warehouse_id', $getWarehouse->id)
                 ->whereIn('barang_id', $barangIds)
                 ->get()
                 ->keyBy('barang_id');
 
             foreach ($request->barangs as $barang) {
+                Log::info($request->barangs);
                 $status = $barang['jml_kekurangan'] > 0 ? 'Retur' : 'Received';
                 $barang['status'] = $status; // Add status key to the barang array
 
@@ -202,7 +204,7 @@ class PenerimaanController extends Controller
                 } else {
                     $stockBarang[$barang['barang_id']] = new StockGudang([
                         'stock_gudang_id' => 'SGID-' . date('Y') . date('m') . str_pad($countStockBarang + 1, 5, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999),
-                        'warehouse_id' => $request->warehouse_id,
+                        'warehouse_id' => $getWarehouse->id,
                         'barang_id' => $barang['barang_id'],
                         'stok' => $barang['barangDatang'],
                     ]);
@@ -254,6 +256,7 @@ class PenerimaanController extends Controller
             $penerimaan->update(['status' => $isPending ? 'Pending' : 'Received']);
             DB::commit();
             GenerateGRNLetter::dispatch($grnData);
+            log_activity("Penerimaan Barang untuk $getWarehouse->name", "Penerimaan Barang", Auth::guard('bisnis_owner')->user()->name, 1);
             return response()->json([
                 'status' => true,
                 'message' => 'Penerimaan Berhasil Dibuat',

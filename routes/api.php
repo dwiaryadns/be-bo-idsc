@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -85,6 +86,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/legal-document-fasyankes/upload', [LegalDocController::class, 'uploadLegalFasyankes']);
 
     Route::get('/subscription/{type}', [SubscriptionController::class, 'index']);
+
+    Route::get('/activity-log', [ActivityLogController::class, 'activity_log']);
 
     Route::post('/change-password', [AuthController::class, 'changePassword']);
 

@@ -133,6 +133,7 @@ class AuthController extends Controller
 
         $cookie = cookie('token', $token, 60 * 24); // 1 day
 
+        log_activity('Melakukan Login', 'Login', $user->name, 1);
         return response()->json([
             'token' => $token,
             'status' => true,
@@ -253,9 +254,10 @@ class AuthController extends Controller
         $user->password = Hash::make($request->new_password);
         $user->save();
 
+        log_activity('Melakukan Ubah Password', 'Keamanan Akun', $user->name, 1);
         return response()->json([
             'status' => true,
-            'message' => 'Password has been updated successfully'
+            'message' => 'Password Berhasil Diubah'
         ], 200);
     }
 }

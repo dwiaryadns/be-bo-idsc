@@ -36,7 +36,7 @@ class Handler extends ExceptionHandler
                 return new JsonResponse([
                     'status' => false,
                     'message' => 'Terjadi kesalahan pada server.',
-                    'error' => $e->getTrace(),
+                    'error' => $e->getMessage(),
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
             Log::info($e);

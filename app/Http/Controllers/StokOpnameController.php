@@ -277,6 +277,13 @@ class StokOpnameController extends Controller
                     'stok' => $request->jml_fisik
                 ]);
             }
+            // log_actvity jika stok barang maka get fasyankes nya jika stok gudang maka get gudang
+            if ($request->stok_barang_id) {
+                log_activity("Melakukan Stock Opname oleh $request->petugas ke Fasyankes {$stokBarang->fasyankes_warehouse->fasyankes->name}", 'Stock Opname', Auth::guard('bisnis_owner')->user()->name, 1);
+            } else {
+                log_activity("Melakukan Stock Opname oleh $request->petugas ke Gudang {$stockGudang->warehouse->name}", 'Stock Opname', Auth::guard('bisnis_owner')->user()->name, 1);
+            }
+            // log_activity("Melakukan Opname oleh $request->petugas ke ")
             return response()->json([
                 'status' => true,
                 'message' => 'Berhasil Opname',

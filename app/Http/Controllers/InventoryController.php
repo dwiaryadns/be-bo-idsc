@@ -177,6 +177,9 @@ class InventoryController extends Controller
             'barang_id' => $barang->barang_id,
             'harga' => str_replace('Rp', '', $harga_beli),
         ]);
+
+        log_activity("Menambahkan Barang Pada Daftar Produk ", "Daftar Produk", Auth::guard('bisnis_owner')->user()->name, 1);
+
         return response()->json([
             'status' => true,
             'message' => 'Berhasil Menambah Barang'
@@ -191,6 +194,7 @@ class InventoryController extends Controller
             $import = new BarangImport;
             Excel::import($import, $request->file('file'));
             $importedData = $import->getData();
+            log_activity("Import Barang Pada Daftar Produk ", "Daftar Produk", Auth::guard('bisnis_owner')->user()->name, 1);
             return response()->json(
                 [
                     'status' => true,
@@ -207,11 +211,5 @@ class InventoryController extends Controller
                 'error' => $th->getMessage()
             ], 422);
         }
-    }
-
-    public function test()
-    {
-        $access = AccessFasyankes::get();
-        return response()->json($access);
     }
 }

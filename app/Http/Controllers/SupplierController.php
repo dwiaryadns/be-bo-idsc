@@ -132,6 +132,7 @@ class SupplierController extends Controller
             'end_pks_date' => $request->end_pks_date,
             'catatan_tambahan' => $request->catatan_tambahan,
         ]);
+        log_activity("Menambahkan Supplier $request->nama_supplier", 'Supplier', $bo->name, 1);
         return response()->json([
             'status' => true,
             'message' => 'Success create supplier',

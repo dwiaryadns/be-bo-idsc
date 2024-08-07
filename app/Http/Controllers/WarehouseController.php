@@ -65,6 +65,7 @@ class WarehouseController extends Controller
                 'contact' => $request->contact,
             ]
         );
+        log_activity("Menambahkan Gudang $request->name", 'Gudang',$user->name,1);
         if ($warehouse) {
             return response()->json([
                 'status' => true,

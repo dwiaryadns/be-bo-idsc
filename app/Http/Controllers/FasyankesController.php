@@ -138,11 +138,16 @@ class FasyankesController extends Controller
         } catch (\Exception $e) {
             Log::info($e->getMessage());
             DB::rollback();
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal Menambahkan Fasyankes',
+            ]);
         }
+        log_activity("Menambahkan Fasyankes $request->type $request->name", "Fasyankes", $bo->name, 1);
         if ($fasyankes) {
             return response()->json([
                 'status' => true,
-                'message' => 'Success Updated Fasyankes',
+                'message' => 'Berhasil Menambahkan Fasyankes',
                 'data' => $fasyankes,
                 'subscription' => $subscriptionPlan,
             ], 200);

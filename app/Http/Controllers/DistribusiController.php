@@ -126,7 +126,10 @@ class DistribusiController extends Controller
                 'keterangan' => $request->keterangan,
             ]);
 
-            $getWfid = FasyankesWarehouse::where('warehouse_id', $warehouseId)->where('fasyankes_id', $fasyankesId)->first();
+            $getWfid = FasyankesWarehouse::with('fasyankes', 'warehouse')
+                ->where('warehouse_id', $warehouseId)
+                ->where('fasyankes_id', $fasyankesId)
+                ->first();
             if (!$getWfid) {
                 DB::rollBack();
                 return response()->json([
@@ -162,6 +165,7 @@ class DistribusiController extends Controller
             }
 
             DB::commit();
+            log_activity("Distribusi dari {$getWfid->warehouse->name} ke {$getWfid->fasyankes->name}", "Distribusi Barang", Auth::guard('bisnis_owner')->user()->name, 1);
             return response()->json([
                 'status' => true,
                 'message' => 'Distribusi created successfully',

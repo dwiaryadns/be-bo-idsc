@@ -61,7 +61,7 @@ class BoInfoController extends Controller
             'postal_code' => 'required|numeric|regex:/^\d{5,}$/',
         ], [
             // postal code minmal 5 angka
-            'postal_code.regex'=> 'Postal Code must be at least 5 digits'
+            'postal_code.regex' => 'Postal Code must be at least 5 digits'
         ]);
         if ($validator->fails()) {
             $errors = collect($validator->errors())->map(function ($messages) {
@@ -79,7 +79,6 @@ class BoInfoController extends Controller
             ], 401);
         }
 
-        // Log user info and request data before creating BoInfo
         Log::info('User authenticated', ['user_id' => $user->id, 'request_data' => $request->all()]);
 
         $y = date('Y');
@@ -102,6 +101,7 @@ class BoInfoController extends Controller
             'status' => 'apply'
         ]);
 
+        log_activity('Upload Bisnis Owner Info', 'Bisnis Owner Info', $user->name, 1);
         return response()->json([
             'status' => true,
             'message' => 'Completed Data Successfully',
