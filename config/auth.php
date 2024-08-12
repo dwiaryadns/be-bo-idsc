@@ -50,6 +50,10 @@ return [
             'provider' => 'bisnis_owners',
             'hash' => false,
         ],
+        'delegate_access' => [
+            'driver' => 'sanctum',
+            'provider' => 'delegate_accesses',
+        ],
     ],
 
     /*
@@ -77,6 +81,10 @@ return [
         'bisnis_owners' => [
             'driver' => 'eloquent',
             'model' => App\Models\BisnisOwner::class,
+        ],
+        'delegate_accesses' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\DelegateAccess::class,
         ],
 
         // 'users' => [

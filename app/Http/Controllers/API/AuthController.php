@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\SendOtpEmailJob;
 use App\Mail\SendOtpMail;
 use App\Models\BisnisOwner;
+use App\Models\DelegateAccess;
 use App\Models\OtpEmail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -30,7 +31,13 @@ class AuthController extends Controller
             'name' => 'required|string|max:255|regex:/^[A-Za-z\s]+$/',
             'email' => 'required|email|max:255|unique:bisnis_owners|regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
             'password' => [
-                'required', 'string', 'confirmed', 'min:8', 'regex:/[A-Z]/', 'regex:/[!@#$%^&*(),.?":{}|<>_]/', 'regex:/[0-9]/'
+                'required',
+                'string',
+                'confirmed',
+                'min:8',
+                'regex:/[A-Z]/',
+                'regex:/[!@#$%^&*(),.?":{}|<>_]/',
+                'regex:/[0-9]/'
             ],
         ], [
             'password.regex' => 'Password must contain at least 1 Uppercase Word, 1 Special Character, and 1 Number',
@@ -108,38 +115,75 @@ class AuthController extends Controller
         $request->validate(
             [
                 'email' => [
-                    'required', 'email', 'regex:/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/'
+                    'required',
+                    'email',
+                    'regex:/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/'
                 ],
                 'password' => 'required',
-            ],
+            ]
         );
 
-        $user = BisnisOwner::where('email', $request->email)
-            ->first();
+        // Cek apakah email ada di BisnisOwner
+        $user = BisnisOwner::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        // Cek apakah email ada di DelegateAccess
+        $delegate = DelegateAccess::where('email', $request->email)->first();
+
+        // Jika email ditemukan di BisnisOwner
+        if ($user) {
+            if (!Hash::check($request->password, $user->password)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid email or password'
+                ], 401);
+            } else if ($user->email_verified_at === null) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'User not verified, Please check your email to verify'
+                ], 401);
+            }
+
+            $token = $user->createToken('iDsm4rtC4R3')->plainTextToken;
+
+            $cookie = cookie('token', $token, 60 * 24); // 1 day
+
+            log_activity('Melakukan Login', 'Login', $user->name, 1);
             return response()->json([
-                'status' => false,
-                'message' => 'Invalid email or password'
-            ], 401);
-        } else if ($user && $user->email_verified_at === null) {
-            return response()->json([
-                'status' => false,
-                'message' => 'User not verified, Please Cek your email to verify'
-            ], 401);
+                'token' => $token,
+                'status' => true,
+                'message' => 'Login Successfully',
+                'data' => $user
+            ], 200)->withCookie($cookie);
         }
 
-        $token = $user->createToken('iDsm4rtC4R3')->plainTextToken;
+        // Jika email ditemukan di DelegateAccess
+        if ($delegate) {
+            // Asumsikan bahwa password delegate disimpan dalam plaintext, seharusnya ini diganti dengan hash
+            if (!Hash::check($request->password, $delegate->password)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid email or password'
+                ], 401);
+            }
 
-        $cookie = cookie('token', $token, 60 * 24); // 1 day
+            $token = $delegate->createToken('iDsm4rtC4R3')->plainTextToken;
 
-        log_activity('Melakukan Login', 'Login', $user->name, 1);
+            $cookie = cookie('token', $token, 60 * 24); // 1 day
+
+            log_activity('Melakukan Login', 'Login', $delegate->name, 1);
+            return response()->json([
+                'token' => $token,
+                'status' => true,
+                'message' => 'Login Successfully',
+                'data' => $delegate
+            ], 200)->withCookie($cookie);
+        }
+
+        // Jika email tidak ditemukan di keduanya
         return response()->json([
-            'token' => $token,
-            'status' => true,
-            'message' => 'Login Successfully',
-            'data' => $user
-        ], 200)->withCookie($cookie);
+            'status' => false,
+            'message' => 'Invalid email or password'
+        ], 401);
     }
 
     public function logout(Request $request)
@@ -149,6 +193,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'User not found'], 404);
         }
         $request->user()->currentAccessToken()->delete();
+        Log::info($request->user());
         return response()->json(['status' => true, 'message' => 'Logged out successfully'], 200);
     }
 
@@ -226,8 +271,13 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'old_password' => ['required', 'string'],
             'new_password' => [
-                'required', 'string', 'min:8', 'confirmed',
-                'regex:/[A-Z]/', 'regex:/[!@#$%^&*(),.?":{}|<>_]/', 'regex:/[0-9]/',
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/[A-Z]/',
+                'regex:/[!@#$%^&*(),.?":{}|<>_]/',
+                'regex:/[0-9]/',
                 function ($attribute, $value, $fail) use ($user) {
                     if (Hash::check($value, $user->password)) {
                         $fail('The new password cannot be the same as the old password.');

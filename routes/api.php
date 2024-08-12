@@ -9,6 +9,7 @@ use App\Http\Controllers\Core\AccessFasyankesController;
 use App\Http\Controllers\Core\IcdxController;
 use App\Http\Controllers\Core\MasterKfaController;
 use App\Http\Controllers\Core\TransaksiController;
+use App\Http\Controllers\DelegateAccessController;
 use App\Http\Controllers\DistribusiController;
 use App\Http\Controllers\FasyankesController;
 use App\Http\Controllers\InventoryController;
@@ -128,5 +129,10 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::get('/', [DistribusiController::class, 'getDistribusi']);
         Route::get('/get-barang', [DistribusiController::class, 'getBarangGudang']);
         Route::post('/store', [DistribusiController::class, 'store']);
+    });
+    Route::prefix('/delegate-access')->group(function () {
+        Route::get('/', [DelegateAccessController::class, 'getDelegateAccess']);
+        Route::post('/store', [DelegateAccessController::class, 'storeDelegateAccess']);
+        Route::delete('/delete/{id}', [DelegateAccessController::class, 'destroy']);
     });
 });

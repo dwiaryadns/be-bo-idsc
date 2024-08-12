@@ -15,6 +15,7 @@ class BisnisOwner extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, HasApiTokens, Notifiable;
     protected $table = 'bisnis_owners';
+    protected $guard = 'bisnis_owner';
     protected $fillable = [
         'name',
         'email',

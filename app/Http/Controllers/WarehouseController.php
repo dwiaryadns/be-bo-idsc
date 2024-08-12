@@ -15,10 +15,12 @@ class WarehouseController extends Controller
     public function getWarehouses()
     {
         $bo = Auth::guard('bisnis_owner')->user();
-        $warehouses = Warehouse::with('fasyankes')
-            ->where('bisnis_owner_id', $bo->id)
-            ->get();
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
 
+        $warehouses = Warehouse::with('fasyankes')
+            ->where('bisnis_owner_id', $id)
+            ->get();
         return response()->json([
             'status' => true,
             'message' => 'Success get warehouse',
@@ -65,7 +67,7 @@ class WarehouseController extends Controller
                 'contact' => $request->contact,
             ]
         );
-        log_activity("Menambahkan Gudang $request->name", 'Gudang',$user->name,1);
+        log_activity("Menambahkan Gudang $request->name", 'Gudang', $user->name, 1);
         if ($warehouse) {
             return response()->json([
                 'status' => true,
