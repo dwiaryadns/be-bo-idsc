@@ -19,7 +19,8 @@ class FasyankesController extends Controller
     public function getFasyankes()
     {
         $bo = Auth::guard('bisnis_owner')->user();
-        $fasyankes = Fasyankes::where('bisnis_owner_id', $bo->id)
+        $fasyankes = Fasyankes::with('warehouse', 'legal_doc')
+            ->where('bisnis_owner_id', $bo->id)
             ->get();
 
         if (!$fasyankes) {
@@ -52,7 +53,13 @@ class FasyankesController extends Controller
                 'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/'
             ],
             'password' => [
-                'required', 'string', 'confirmed', 'min:8', 'regex:/[A-Z]/', 'regex:/[!@#$%^&*(),.?":{}|<>_]/', 'regex:/[0-9]/'
+                'required',
+                'string',
+                'confirmed',
+                'min:8',
+                'regex:/[A-Z]/',
+                'regex:/[!@#$%^&*(),.?":{}|<>_]/',
+                'regex:/[0-9]/'
             ],
             'password_confirmation' => 'required',
         ], [

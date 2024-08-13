@@ -40,6 +40,11 @@ class Fasyankes extends Model
     {
         return $this->hasMany(AccessFasyankes::class);
     }
+
+    public function legal_doc()
+    {
+        return $this->hasOne(LegalDocFasyankes::class, 'fasyankes_id', 'fasyankesId');
+    }
     protected $casts = [
         'is_active' => 'boolean',
     ];

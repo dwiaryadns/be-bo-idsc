@@ -52,7 +52,7 @@ class SubscriptionController extends Controller
                 'expired_at' => date('d M Y H:i', strtotime($transaction->payment->expired_at)),
                 'amount' => 'Rp ' .  number_format($transaction->gross_amount, 2, ',', '.'),
                 'transaction_time' => date('d M Y H:i', strtotime($transaction->transaction_time)),
-                'payment_type' => $payment_type,
+                'payment_type' => strtoupper($payment_type),
                 'status' =>  ucfirst($transaction->transaction_status),
                 'fasyankes' => $fasyankes,
                 'plan' => $plan . ' ' . $duration,

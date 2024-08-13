@@ -21,6 +21,6 @@ class LegalDocFasyankes extends Model
 
     public function fasyankes()
     {
-        return $this->belongsTo(Fasyankes::class);
+        return $this->belongsTo(Fasyankes::class, 'fasyankes_id', 'fasyankesId');
     }
 }

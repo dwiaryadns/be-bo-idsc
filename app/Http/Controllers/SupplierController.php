@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class SupplierController extends Controller
@@ -53,6 +54,7 @@ class SupplierController extends Controller
 
     public function storeSupplier(Request $request)
     {
+        Log::info($request->all());
         $validator = Validator::make($request->all(), [
             'nama_supplier' => 'required',
             'alamat' => 'required',
@@ -92,9 +94,9 @@ class SupplierController extends Controller
             'tipe_supplier.required' => 'Tipe Supplier wajib diisi',
             'nomor_npwp.required' => 'Nomor NPWP wajib diisi',
             'start_pks_date.required' => 'Tanggal Kerjsama wajib diisi',
-            'end_pks_date.required' => 'Tanggal Kerjsama wajib diisi',
+            'end_pks_date.required' => 'Tanggal Selesai Kerjsama wajib diisi',
             'start_pks_date.date' => 'Tanggal harus dalam format tanggal',
-            'end_pks_date.date' => 'Tanggal harus dalam format tanggal',
+            'end_pks_date.date' => 'Tanggal Selesai Kerjasama harus dalam format tanggal',
         ]);
         if ($validator->fails()) {
             $errors = collect($validator->errors())->map(function ($messages) {

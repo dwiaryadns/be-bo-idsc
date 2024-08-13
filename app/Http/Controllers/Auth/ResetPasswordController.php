@@ -49,6 +49,7 @@ class ResetPasswordController extends Controller
         $user->password = Hash::make($request->password);
         $user->save();
         DB::table('password_reset_tokens')->where('email', $user->email)->delete();
+        log_activity('Melakukan Reset Password', 'Reset Password', $user->email, 1);
         return response()->json([
             'status' => true,
             'message' => 'Successfully Reset Password'

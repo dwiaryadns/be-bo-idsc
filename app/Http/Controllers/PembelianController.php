@@ -182,7 +182,7 @@ class PembelianController extends Controller
         $detailPembelianData = [];
         foreach ($barangList as $barangData) {
             $barangID = $barangData['barang_id'];
-            $jumlah = $barangData['qty'];
+            $jumlah = !empty($barangData['qty']) ? $barangData['qty'] : 0;
             $barangDetail = $barangDetails->get($barangID);
             $hargaSatuan = $barangDetail->harga_beli;
             $totalHargaBarang = $hargaSatuan * $jumlah;
