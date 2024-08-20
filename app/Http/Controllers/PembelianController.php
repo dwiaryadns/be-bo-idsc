@@ -121,8 +121,9 @@ class PembelianController extends Controller
             'supplier_id' => 'required|string',
             'po_name' => 'required'
         ], [
-            'warehouse_id' => 'The Warehouse field is required',
-            'po_name' => 'PO Name is required'
+            'warehouse_id' => 'Gudang Wajib diisi ',
+            'po_name' => 'Nama PO wajib diisi',
+
         ]);
 
         if ($validator->fails()) {
@@ -130,7 +131,11 @@ class PembelianController extends Controller
             $errors = collect($validator->errors())->map(function ($messages) {
                 return $messages[0];
             });
-            return response()->json(['status' => false, 'message' => 'failed', 'errors' => $errors], 422);
+            return response()->json([
+                'status' => false,
+                'message' => 'Pembelian Gagal',
+                'errors' => $errors
+            ], 422);
         }
 
         $barangIds = collect($request->barang)->pluck('barang_id');

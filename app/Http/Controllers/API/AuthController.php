@@ -123,13 +123,10 @@ class AuthController extends Controller
             ]
         );
 
-        // Cek apakah email ada di BisnisOwner
         $user = BisnisOwner::where('email', $request->email)->first();
 
-        // Cek apakah email ada di DelegateAccess
         $delegate = DelegateAccess::where('email', $request->email)->first();
 
-        // Jika email ditemukan di BisnisOwner
         if ($user) {
             if (!Hash::check($request->password, $user->password)) {
                 return response()->json([
@@ -156,9 +153,7 @@ class AuthController extends Controller
             ], 200)->withCookie($cookie);
         }
 
-        // Jika email ditemukan di DelegateAccess
         if ($delegate) {
-            // Asumsikan bahwa password delegate disimpan dalam plaintext, seharusnya ini diganti dengan hash
             if (!Hash::check($request->password, $delegate->password)) {
                 return response()->json([
                     'status' => false,
@@ -179,7 +174,6 @@ class AuthController extends Controller
             ], 200)->withCookie($cookie);
         }
 
-        // Jika email tidak ditemukan di keduanya
         return response()->json([
             'status' => false,
             'message' => 'Invalid email or password'
@@ -199,6 +193,25 @@ class AuthController extends Controller
 
     public function getOtp(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'newEmail' => 'nullable|email|max:255|unique:bisnis_owners,email'
+        ], [
+            'email.required' => 'Email harus diisi',
+            'email.email' => 'Format email salah',
+            'email.unique' => 'Email sudah terdaftar',
+            'newEmail.email' => 'Format email salah',
+            'newEmail.unique' => 'Email baru sudah terdaftar',
+        ]);
+
+        if ($validator->fails()) {
+            $errors = collect($validator->errors())->map(function ($messages) {
+                return $messages[0];
+            });
+            return response()->json(['status' => false, 'message' => 'Gagal Merubah Email', 'errors' => $errors], 422);
+        }
+
+
         $url = 'https://api.fazpass.com/v1/otp/request';
         $headers = [
             'Authorization: Bearer ' . $request->header('Authorization'),
@@ -209,6 +222,15 @@ class AuthController extends Controller
             'phone' => '',
             'gateway_key' => env('GATEWAY_KEY', '3954aa72-856e-49eb-8b1c-f18d658ee067'),
         ];
+
+        $newEmail = $request->newEmail;
+        if ($newEmail) {
+            $checkBo = BisnisOwner::where('email', $request->email)->first();
+            if ($checkBo && $checkBo->email == $newEmail) {
+                return response()->json(['status' => false, 'message' => 'Email sudah terdaftar'], 422);
+            }
+            $checkBo->update(['email' => $newEmail]);
+        }
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -224,7 +246,7 @@ class AuthController extends Controller
         if ($error) {
             return response()->json(['error' => $error], 500);
         }
-        Log::info($response);
+        Log::info('response : ' . $response);
         return response()->json(json_decode($response, true));
     }
 
