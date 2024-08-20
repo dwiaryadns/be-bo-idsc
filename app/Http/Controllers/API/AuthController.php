@@ -193,6 +193,7 @@ class AuthController extends Controller
 
     public function getOtp(Request $request)
     {
+        Log::info($request->all());
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'newEmail' => 'nullable|email|max:255|unique:bisnis_owners,email'
@@ -226,11 +227,15 @@ class AuthController extends Controller
         $newEmail = $request->newEmail;
         if ($newEmail) {
             $checkBo = BisnisOwner::where('email', $request->email)->first();
-            if ($checkBo && $checkBo->email == $newEmail) {
-                return response()->json(['status' => false, 'message' => 'Email sudah terdaftar'], 422);
+            if ($checkBo) {
+                $emailExists = BisnisOwner::where('email', $newEmail)->exists();
+                if ($emailExists) {
+                    return response()->json(['status' => false, 'message' => 'Email baru sudah terdaftar'], 422);
+                }
+                $checkBo->update(['email' => $newEmail]);
             }
-            $checkBo->update(['email' => $newEmail]);
         }
+
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -252,6 +257,7 @@ class AuthController extends Controller
 
     public function storeOtp(Request $request)
     {
+        Log::info($request->all());
         $url = 'https://api.fazpass.com/v1/otp/verify';
         $headers = [
             'Authorization: Bearer ' . $request->header('Authorization'),
@@ -259,9 +265,7 @@ class AuthController extends Controller
         ];
 
         $bo = BisnisOwner::where('email', $request->email)->first();
-        if ($bo) {
-            $bo->markEmailAsVerified();
-        }
+
 
         $data = [
             'otp_id' => $request->input('otp_id'),
@@ -283,6 +287,9 @@ class AuthController extends Controller
             return response()->json(['error' => $error], 500);
         }
         Log::info($response);
+        if ($bo) {
+            $bo->markEmailAsVerified();
+        }
         return response()->json(json_decode($response, true));
     }
 
