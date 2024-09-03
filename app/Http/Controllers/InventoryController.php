@@ -190,6 +190,9 @@ class InventoryController extends Controller
     {
         $request->validate([
             'file' => 'required|mimes:xls,xlsx'
+        ], [
+            'file.required' => 'File harus diisi',
+            'file.mimes' => 'File harus berformat Excel (xls, xlsx)'
         ]);
 
         try {
