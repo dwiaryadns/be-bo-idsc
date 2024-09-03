@@ -57,7 +57,8 @@ class InventoryController extends Controller
         $barangs = $query->with([
             'supplier' => function ($q) {
                 $q->select('supplier_id', 'nama_supplier');
-            }, 'kategori_barang',
+            },
+            'kategori_barang',
         ])->whereHas('supplier', function ($q) use ($bo) {
             $q->where('bisnis_owner_id', $bo->id);
         })->paginate($perPage, ['*'], 'page', $page);
@@ -190,26 +191,48 @@ class InventoryController extends Controller
         $request->validate([
             'file' => 'required|mimes:xls,xlsx'
         ]);
+
         try {
             $import = new BarangImport;
             Excel::import($import, $request->file('file'));
+
             $importedData = $import->getData();
-            log_activity("Import Barang Pada Daftar Produk ", "Daftar Produk", Auth::guard('bisnis_owner')->user()->name, 1);
-            return response()->json(
-                [
-                    'status' => true,
-                    'message' => 'File berhasil diimpor',
-                    'data' => $importedData
-                ],
-                200
-            );
+            $errors = $import->formatErrors();
+
+            Log::info('Import Barang: ' . count($importedData) . ' items imported successfully.');
+            if (!empty($errors)) {
+                Log::warning('Import Barang: Errors encountered', $errors);
+            }
+
+            log_activity("Import Barang Pada Daftar Produk", "Daftar Produk", Auth::guard('bisnis_owner')->user()->name, 1);
+
+            return response()->json([
+                'status' => true,
+                'message' => empty($errors) ? 'File berhasil diimpor' : 'File diimpor dengan beberapa error',
+                'data' => $importedData,
+                'errors' => $errors
+            ], 200);
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $errors = collect($failures)->map(function ($failure) {
+                return "Baris {$failure->row()}: " . $failure->errors()[0];
+            })->toArray();
+
+            Log::error('Import Barang: Validation failed', $errors);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Validasi gagal saat import barang',
+                'errors' => $errors
+            ], 422);
         } catch (\Throwable $th) {
-            Log::info($th->getMessage());
+            Log::error('Import Barang: Unexpected error', ['message' => $th->getMessage()]);
+
             return response()->json([
                 'status' => false,
                 'message' => 'Gagal Import Barang',
                 'error' => $th->getMessage()
-            ], 422);
+            ], 500);
         }
     }
 }

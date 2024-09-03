@@ -9,6 +9,7 @@ use App\Models\Pembelian;
 use App\Models\StockBarang;
 use App\Models\SupplierBarang;
 use App\Models\Warehouse;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +22,7 @@ class PembelianController extends Controller
     public function getPurchase()
     {
         $purchase = Pembelian::with('detail_pembelians.barang')
+            ->orderBy('created_at', 'DESC')
             ->whereRelation('warehouse.bisnis_owner', 'id', Auth::guard('bisnis_owner')->user()->id)
             ->get();
 
@@ -210,5 +212,30 @@ class PembelianController extends Controller
             'status' => true,
             'message' => 'Purchase Successfully',
         ], 200);
+    }
+
+    public function download_pdf(Request $request)
+    {
+        try {
+            $poId = $request->po_id;
+            Log::info('POID : ' . $poId);
+            $data = Pembelian::with('detail_pembelians')->where('po_id', $poId)->first();
+            Log::info($data);
+            $pdf = PDF::loadView('purchase', compact('data'))
+                ->setPaper('a4')
+                ->setOptions([
+                    'isHtml5ParserEnabled' => true,
+                    'isRemoteEnabled' => true,
+                    'defaultFont' => 'DejaVu Sans',
+                    'encoding' => 'UTF-8'
+                ]);
+            return $pdf->download($poId . '.pdf');
+        } catch (\Throwable $th) {
+            Log::error('Gagal Download PDF: ' . $th->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal Download PDF'
+            ], 500);
+        }
     }
 }

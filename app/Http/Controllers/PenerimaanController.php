@@ -30,6 +30,7 @@ class PenerimaanController extends Controller
         }
 
         $penerimaan = PenerimaanBarang::with('good_receipt_notes', 'pembelian', 'detailPending')
+            ->orderBy('created_at', 'DESC')
             ->whereRelation('warehouse.bisnis_owner', 'id', Auth::guard('bisnis_owner')->user()->id)
             ->get();
 
@@ -101,36 +102,6 @@ class PenerimaanController extends Controller
             'data' => $data
         ]);
     }
-
-
-    // public function generateGRN($grnData)
-    // {
-    //     try {
-    //         $pdf = Pdf::loadView('grn-template', compact('grnData'));
-    //         $pdfContent = $pdf->output();
-
-    //         $fileName = $grnData['grn_id'] . '-' . Str::uuid() . '.pdf';
-    //         Storage::disk('s3')->put($fileName, $pdfContent, 'public');
-    //         $url = Storage::disk('s3')->url($fileName);
-
-    //         GoodReceiptNote::where('grn_id', $grnData['grn_id'])->first()->update([
-    //             'url_file' => $url
-    //         ]);
-
-    //         Log::info('PDF generated and uploaded successfully:', ['url' => $url]);
-
-    //         return response()->json([
-    //             'message' => 'PDF generated and uploaded successfully.',
-    //             'url' => $url,
-    //         ]);
-    //     } catch (\Exception $e) {
-    //         Log::error('Failed to generate and upload PDF:', ['error' => $e->getMessage()]);
-    //         return response()->json([
-    //             'message' => 'Failed to generate and upload PDF.',
-    //             'error' => $e->getMessage(),
-    //         ], 500);
-    //     }
-    // }
 
     public function save(Request $request)
     {
@@ -274,6 +245,7 @@ class PenerimaanController extends Controller
 
     public function updateStockPenerimaan(Request $request)
     {
+        Log::info($request->all());
         try {
             DB::beginTransaction();
             $penerimaan = PenerimaanBarang::where('penerimaan_id', $request->barangs[0]['penerimaan_id'])->first();
@@ -303,6 +275,7 @@ class PenerimaanController extends Controller
                     'jml_datang' => $barang['jml_datang'],
                     'jml_kurang' => $barang['jml_kurang'],
                     'status' => $status,
+                    'kondisi' => $barang['kondisi']
                 ]);
                 $barangs[] = [
                     'nama' => $detail->barang->nama_barang,
@@ -325,7 +298,7 @@ class PenerimaanController extends Controller
                     break;
                 }
             }
-            $penerimaan->update(['status' => $isCompleted ? 'Completed' : 'Pending']);
+            $penerimaan->update(['status' => $isCompleted ? 'Completed' : 'Pending'],);
 
             $countGrn = GoodReceiptNote::count();
             $grn = GoodReceiptNote::create([

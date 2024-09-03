@@ -94,6 +94,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
     Route::prefix('/purchase')->group(function () {
         Route::get('/', [PembelianController::class, 'getPurchase']);
+        Route::post('/download', [PembelianController::class, 'download_pdf']);
         Route::get('/get-barang-supplier', [PembelianController::class, 'getBarangSupplier']);
         Route::get('/get-fasyankes-warehouse', [PembelianController::class, 'getFasyankesWarehouse']);
         Route::post('/store', [PembelianController::class, 'purchase']);

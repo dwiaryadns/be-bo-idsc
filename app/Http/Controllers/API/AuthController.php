@@ -218,22 +218,20 @@ class AuthController extends Controller
             'Authorization: Bearer ' . $request->header('Authorization'),
             'Content-Type: application/json',
         ];
+        $newEmail = $request->newEmail;
         $data = [
-            'email' => $request->input('email'),
+            'email' => $newEmail ?? $request->input('email'),
             'phone' => '',
             'gateway_key' => env('GATEWAY_KEY', '3954aa72-856e-49eb-8b1c-f18d658ee067'),
         ];
 
-        $newEmail = $request->newEmail;
+        Log::info($request->all());
         if ($newEmail) {
             $checkBo = BisnisOwner::where('email', $request->email)->first();
-            if ($checkBo) {
-                $emailExists = BisnisOwner::where('email', $newEmail)->exists();
-                if ($emailExists) {
-                    return response()->json(['status' => false, 'message' => 'Email baru sudah terdaftar'], 422);
-                }
-                $checkBo->update(['email' => $newEmail]);
+            if ($checkBo && $checkBo->email == $newEmail) {
+                return response()->json(['status' => false, 'message' => 'Email sudah terdaftar'], 422);
             }
+            $checkBo->update(['email' => $newEmail]);
         }
 
 

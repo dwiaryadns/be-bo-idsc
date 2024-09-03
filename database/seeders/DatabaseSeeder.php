@@ -138,6 +138,15 @@ class DatabaseSeeder extends Seeder
             'role' => 'kasir',
             'id_profile' => 5
         ]);
+        AccessFasyankes::create([
+            'fasyankes_id' => '12345678',
+            'username' => 'user_test',
+            'password' => Hash::make('Coba123*#'),
+            'is_active' => 1,
+            'created_by' => 'admin',
+            'role' => 'tester',
+            'id_profile' => 13
+        ]);
 
         $this->call(KfaSeeder::class);
         $this->call(KategoriBarangApotekSeeder::class);
@@ -146,11 +155,6 @@ class DatabaseSeeder extends Seeder
         $this->call(SupplierBarangsSeeder::class);
         $this->call(ICDXSeeder::class);
         $this->call(StockBarangsSeeder::class);
-        // $this->call(PembelianSeeder::class);
-        // $this->call(DetailPembelianSeeder::class);
-        // $this->call(PenerimaanBarangSeeder::class);
-        // $this->call(DetailPenerimaanBarangSeeder::class);
-        // $this->call(GoodReceiptNoteSeeder::class);
         $this->call(DiskonSeeder::class);
     }
 }
