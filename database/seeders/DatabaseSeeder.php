@@ -64,6 +64,8 @@ class DatabaseSeeder extends Seeder
             'pic_number' => '0893849238293',
             'email' => 'teguh@gmail.com',
             'is_active' => 1,
+            'latitude' => "-6.191385",
+            'longitude' => '106.8338377'
         ]);
         $fasyankes2 = Fasyankes::create([
             'fasyankesId' => '123456789',
@@ -76,6 +78,8 @@ class DatabaseSeeder extends Seeder
             'pic_number' => '0893849238293',
             'email' => 'arya@gmail.com',
             'is_active' => 1,
+            'latitude' => "-6.191385",
+            'longitude' => '106.8338377'
         ]);
         $fasyankesWarehouses = [
             [

@@ -44,6 +44,8 @@ class FasyankesController extends Controller
             'package_plan' => 'required',
             'warehouse_id' => 'required',
             'name' => 'required',
+            'latitude' => 'required',
+            'longitude' => 'required',
             'address' => 'required',
             'pic' => 'required',
             'pic_number' => 'required|numeric',
@@ -69,6 +71,8 @@ class FasyankesController extends Controller
             'package_plan.required' => 'Package Plan is required',
             'warehouse_id.required' => 'Warehouse is required',
             'name.required' => 'Name Fasyankes is required',
+            'latitude.required' => 'Latitude is required',
+            'longitude.required' => 'Longitude is required',
             'address.required' => 'Address is required',
             'pic.required' => 'PIC is required',
             'pic_number.required' => 'PIC Phone Number is required',
@@ -109,6 +113,8 @@ class FasyankesController extends Controller
                 'email' => $request->email,
                 'is_active' => 1,
                 'bisnis_owner_id' => $bo->id,
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
             ]);
 
             $accessFasyankes = AccessFasyankes::updateOrCreate([

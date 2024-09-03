@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('fasyankes', function (Blueprint $table) {
-            $table->string('fasyankesId')->primary(); // Menggunakan unsignedBigInteger
+            $table->string('fasyankesId')->primary();
             $table->foreignId('warehouse_id')->constrained()->onDelete('cascade');
             $table->foreignId('bisnis_owner_id')->constrained()->onDelete('cascade');
             $table->string('type');
@@ -20,9 +20,9 @@ return new class extends Migration
             $table->text('address');
             $table->string('pic');
             $table->string('pic_number');
-            // $table->string('username')->unique();
             $table->string('email');
-            // $table->string('password');
+            $table->string('latitude');
+            $table->string('longitude');
             $table->boolean('is_active');
             $table->timestamps();
         });
