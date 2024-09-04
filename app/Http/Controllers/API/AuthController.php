@@ -3,20 +3,13 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Jobs\SendOtpEmailJob;
-use App\Mail\SendOtpMail;
 use App\Models\BisnisOwner;
 use App\Models\DelegateAccess;
-use App\Models\OtpEmail;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
@@ -30,6 +23,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255|regex:/^[A-Za-z\s]+$/',
             'email' => 'required|email|max:255|unique:bisnis_owners|regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
+            'phone' => 'required',
             'password' => [
                 'required',
                 'string',
@@ -41,8 +35,9 @@ class AuthController extends Controller
             ],
         ], [
             'password.regex' => 'Password must contain at least 1 Uppercase Word, 1 Special Character, and 1 Number',
-            'email.regex' => 'Invalid format email',
-            'name.regex' => 'Invalid format fullname',
+            'email.regex' => 'Format email tidak sesuai',
+            'name.regex' => 'Format nama tidak sesuai',
+            'phone.required' => 'Phone Harus diisi.',
         ]);
 
         if ($validator->fails()) {
@@ -54,6 +49,7 @@ class AuthController extends Controller
         $user = BisnisOwner::create([
             'name' => $request->name,
             'email' => $request->email,
+            'phone'=> $request->phone,
             'password' => Hash::make($request->password),
         ]);
         if (!$user) {
@@ -75,40 +71,6 @@ class AuthController extends Controller
         ], 200);
     }
 
-    public function resendOtp(Request $request)
-    {
-        Log::info('Resend OTP request received for email: ' . $request->email);
-
-        $bo = BisnisOwner::where('email', $request->email)->first();
-        if (!$bo) {
-            Log::error('Email not found: ' . $request->email);
-            return response()->json(['status' => false, 'message' => 'Email not found'], 404);
-        }
-
-        $otp = $this->generateOtp();
-        Log::info('Generated OTP: ' . $otp . ' for email: ' . $request->email);
-
-        OtpEmail::create([
-            'bisnis_owner_id' => $bo->id,
-            'otp' => $otp,
-            'expired_at' => Carbon::now()->addMinutes(5)
-        ]);
-
-        if ($otp === null) {
-            Log::error('OTP is null for email: ' . $request->email);
-            return response()->json(['status' => false, 'message' => 'Failed to generate OTP'], 500);
-        }
-
-        try {
-            SendOtpEmailJob::dispatch($request->email, $otp);
-            Log::info('OTP job dispatched for email: ' . $request->email);
-        } catch (\Exception $e) {
-            Log::error('Failed to dispatch OTP job: ' . $e->getMessage());
-            return response()->json(['status' => false, 'message' => 'Failed to dispatch OTP job'], 500);
-        }
-
-        return response()->json(['status' => true, 'message' => 'Resend OTP Successfully'], 200);
-    }
 
     public function login(Request $request)
     {
@@ -245,11 +207,11 @@ class AuthController extends Controller
         $error = curl_error($ch);
 
         curl_close($ch);
+        Log::info('response : ' . $response);
 
         if ($error) {
             return response()->json(['error' => $error], 500);
         }
-        Log::info('response : ' . $response);
         return response()->json(json_decode($response, true));
     }
 

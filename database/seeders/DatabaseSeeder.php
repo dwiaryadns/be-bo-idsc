@@ -23,8 +23,9 @@ class DatabaseSeeder extends Seeder
     {
 
         $bo = BisnisOwner::create([
-            'name' => 'Ngab Dwi',
-            'email' => 'test@gmail.com',
+            'name' => 'Dwi Arya Putra',
+            'phone' => '08123456789',
+            'email' => 'daoasir@gmail.com',
             'email_verified_at' => now(),
             'password' => Hash::make('idsc123*')
         ]);
@@ -33,6 +34,7 @@ class DatabaseSeeder extends Seeder
 
         $bo2 = BisnisOwner::create([
             'name' => 'Teguh',
+            'phone' => '08123456789',
             'email' => 'teguh@gmail.com',
             'email_verified_at' => now(),
             'password' => Hash::make('idsc123*')

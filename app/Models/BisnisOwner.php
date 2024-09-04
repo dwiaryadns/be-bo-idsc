@@ -19,6 +19,7 @@ class BisnisOwner extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'name',
         'email',
+        'phone',
         'password',
         'is_send_email',
         'is_resend',
