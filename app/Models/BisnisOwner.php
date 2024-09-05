@@ -25,6 +25,7 @@ class BisnisOwner extends Authenticatable implements MustVerifyEmail
         'is_resend',
         'is_first_login',
         'img_profile',
+        'email_verified_at'
     ];
 
     protected $hidden = [

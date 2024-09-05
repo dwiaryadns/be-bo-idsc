@@ -13,11 +13,7 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    public function generateOtp()
-    {
-        $otp = rand(100000, 999999);
-        return $otp;
-    }
+    
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -46,31 +42,123 @@ class AuthController extends Controller
             });
             return response()->json(['status' => false, 'errors' => $errors], 422);
         }
+        Log::info($request->all());
+        $getOtp = $this->getOtp($request->email);
+        Log::info($getOtp);
+
+        if ($getOtp['status'] === false) {
+            return response()->json(['status' => 'false', 'message' => 'Email tidak valid, periksa kembali email yang Anda gunakan.']);
+        }
+
         $user = BisnisOwner::create([
             'name' => $request->name,
             'email' => $request->email,
-            'phone'=> $request->phone,
+            'phone' => $request->phone,
             'password' => Hash::make($request->password),
         ]);
         if (!$user) {
-            return response()->json(['message' => 'Something went wrong'], 500);
+            return response()->json(
+                ['success' => false, 'message' => 'Gagal Register'],
+                400
+            );
         }
         $token = $user->createToken('iDsm4rtC4R3')->plainTextToken;
 
-        $otp = $this->generateOtp();
-
-        if ($otp === null) {
-            Log::error('OTP is null for email: ' . $request->email);
-            return response()->json(['status' => false, 'message' => 'Failed to generate OTP'], 500);
-        }
         return response()->json([
             'status' => true,
             'message' => 'Registration Successfully',
             'user' => $user,
+            'otp_id' => $getOtp['data']['id'],
             'register_id' => encrypt(rand(1000000000000000000, 999999999999999999)),
         ], 200);
     }
 
+    public function getOtp($email)
+    {
+        $url = 'https://api.fazpass.com/v1/otp/request';
+        $headers = [
+            'Authorization: Bearer ' . env('AUTHORIZATION_KEY'),
+            'Content-Type: application/json',
+        ];
+        $data = [
+            'email' => $email,
+            'phone' => '',
+            'gateway_key' => env('GATEWAY_KEY'),
+        ];
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $response = curl_exec($ch);
+        $error = curl_error($ch);
+
+        curl_close($ch);
+        Log::info('response : ' . $response);
+        Log::info('error : ' . $error);
+        if ($error) {
+            return $error;
+        }
+        return json_decode($response, true);
+    }
+
+    public function changeEmail(Request $request)
+    {
+        $oldEmail = $request->old_email;
+        $checkBo = BisnisOwner::where('email', $oldEmail)
+            ->whereNull('email_verified_at')
+            ->first();
+
+        if (!$checkBo) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Email Lama Salah'
+            ], 404);
+        }
+        $newEmail = $request->new_email;
+        $checkExistBo = BisnisOwner::where('email', $newEmail)->first();
+        if ($checkExistBo) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Email Baru Sudah Terdaftar'
+            ], 422);
+        }
+        $getOtp = $this->getOtp($newEmail);
+        if ($getOtp['status'] === false) {
+            return response()->json(['status' => false, 'message' => 'Email baru tidak valid, periksa kembali email yang Anda gunakan.']);
+        }
+        $checkBo->update(
+            ['email' => $newEmail]
+        );
+        return response()->json([
+            'status' => true,
+            'message' => 'Berhasil Merubah Email',
+            'otp_id' => $getOtp['data']['id']
+        ], 200);
+    }
+
+    public function resendOtp(Request $request)
+    {
+        $email = $request->email;
+        $checkBo = BisnisOwner::where('email', $email)->first();
+        if (!$checkBo) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Email Tidak Ditemukan'
+            ], 404);
+        }
+        $getOtp = $this->getOtp($email);
+        if ($getOtp['status'] === false) {
+            return response()->json(['status' => false, 'message' => 'Email yang Anda gunakan tidak valid, periksa kembali email yang Anda gunakan.']);
+        }
+        return response()->json([
+            'status' => true,
+            'message' => 'Berhasil Mengirim Ulang OTP',
+            'otp_id' => $getOtp['data']['id']
+        ], 200);
+    }
 
     public function login(Request $request)
     {
@@ -153,68 +241,6 @@ class AuthController extends Controller
         return response()->json(['status' => true, 'message' => 'Logged out successfully'], 200);
     }
 
-    public function getOtp(Request $request)
-    {
-        Log::info($request->all());
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'newEmail' => 'nullable|email|max:255|unique:bisnis_owners,email'
-        ], [
-            'email.required' => 'Email harus diisi',
-            'email.email' => 'Format email salah',
-            'email.unique' => 'Email sudah terdaftar',
-            'newEmail.email' => 'Format email salah',
-            'newEmail.unique' => 'Email baru sudah terdaftar',
-        ]);
-
-        if ($validator->fails()) {
-            $errors = collect($validator->errors())->map(function ($messages) {
-                return $messages[0];
-            });
-            return response()->json(['status' => false, 'message' => 'Gagal Merubah Email', 'errors' => $errors], 422);
-        }
-
-
-        $url = 'https://api.fazpass.com/v1/otp/request';
-        $headers = [
-            'Authorization: Bearer ' . $request->header('Authorization'),
-            'Content-Type: application/json',
-        ];
-        $newEmail = $request->newEmail;
-        $data = [
-            'email' => $newEmail ?? $request->input('email'),
-            'phone' => '',
-            'gateway_key' => env('GATEWAY_KEY', '3954aa72-856e-49eb-8b1c-f18d658ee067'),
-        ];
-
-        Log::info($request->all());
-        if ($newEmail) {
-            $checkBo = BisnisOwner::where('email', $request->email)->first();
-            if ($checkBo && $checkBo->email == $newEmail) {
-                return response()->json(['status' => false, 'message' => 'Email sudah terdaftar'], 422);
-            }
-            $checkBo->update(['email' => $newEmail]);
-        }
-
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-        $response = curl_exec($ch);
-        $error = curl_error($ch);
-
-        curl_close($ch);
-        Log::info('response : ' . $response);
-
-        if ($error) {
-            return response()->json(['error' => $error], 500);
-        }
-        return response()->json(json_decode($response, true));
-    }
-
     public function storeOtp(Request $request)
     {
         Log::info($request->all());
@@ -251,52 +277,5 @@ class AuthController extends Controller
             $bo->markEmailAsVerified();
         }
         return response()->json(json_decode($response, true));
-    }
-
-    public function changePassword(Request $request)
-    {
-        $user = Auth::guard('bisnis_owner')->user();
-
-        $validator = Validator::make($request->all(), [
-            'old_password' => ['required', 'string'],
-            'new_password' => [
-                'required',
-                'string',
-                'min:8',
-                'confirmed',
-                'regex:/[A-Z]/',
-                'regex:/[!@#$%^&*(),.?":{}|<>_]/',
-                'regex:/[0-9]/',
-                function ($attribute, $value, $fail) use ($user) {
-                    if (Hash::check($value, $user->password)) {
-                        $fail('The new password cannot be the same as the old password.');
-                    }
-                }
-            ],
-            'new_password_confirmation' => ['required', 'min:8', 'regex:/[A-Z]/', 'regex:/[!@#$%^&*(),.?":{}|<>_]/', 'regex:/[0-9]/']
-        ]);
-
-        if ($validator->fails()) {
-            $errors = collect($validator->errors())->map(function ($messages) {
-                return $messages[0];
-            });
-            return response()->json(['status' => false, 'errors' => $errors], 422);
-        }
-
-        if (!$user || !Hash::check($request->old_password, $user->password)) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Invalid old password'
-            ], 401);
-        }
-
-        $user->password = Hash::make($request->new_password);
-        $user->save();
-
-        log_activity('Melakukan Ubah Password', 'Keamanan Akun', $user->name, 1);
-        return response()->json([
-            'status' => true,
-            'message' => 'Password Berhasil Diubah'
-        ], 200);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AccessFasyankes;
+use App\Models\BisnisOwner;
 use App\Models\Fasyankes;
 use App\Models\FasyankesWarehouse;
 use App\Models\SubscriptionPlan;
@@ -165,5 +166,45 @@ class FasyankesController extends Controller
                 'subscription' => $subscriptionPlan,
             ], 200);
         }
+    }
+
+    public function getOtp($email)
+    {
+        $url = 'https://api.fazpass.com/v1/otp/request';
+        $headers = [
+            'Authorization: Bearer ' . env('AUTHORIZATION_KEY'),
+            'Content-Type: application/json',
+        ];
+        $data = [
+            'email' => $email,
+            'phone' => '',
+            'gateway_key' => env('GATEWAY_KEY'),
+        ];
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $response = curl_exec($ch);
+        $error = curl_error($ch);
+
+        curl_close($ch);
+        Log::info('response : ' . $response);
+        Log::info('error : ' . $error);
+        if ($error) {
+            return $error;
+        }
+        return json_decode($response, true);
+    }
+    public function sendOtp(Request $request)
+    {
+        $email  = $request->email;
+        $getOtp = $this->getOtp($email);
+        if ($getOtp['status'] === false) {
+            return response()->json(['status' => false, 'message' => 'Email tidak valid, periksa kembali email yang Anda gunakan.']);
+        }
+        return response()->json(['status' => true, 'message' => 'Berhasil Mengirim OTP', 'otp_id' => $getOtp['data']['id']]);
     }
 }

@@ -13,6 +13,7 @@ use App\Http\Controllers\DelegateAccessController;
 use App\Http\Controllers\DistribusiController;
 use App\Http\Controllers\FasyankesController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\KeamananAkunController;
 use App\Http\Controllers\LegalDocController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PembelianController;
@@ -38,9 +39,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
 Route::post('/get-otp', [AuthController::class, 'getOtp']);
+Route::post('/change-email', [AuthController::class, 'changeEmail']);
 Route::post('/store-otp', [AuthController::class, 'storeOtp']);
+Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
 Route::post('/midtrans/callback', [PaymentController::class, 'handleNotification']);
 Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail']);
 Route::get('/check/token/{token}', [ForgotPasswordController::class, 'checkToken']);
@@ -79,6 +81,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::prefix('fasyankes')->group(function () {
         Route::get('/', [FasyankesController::class, 'getFasyankes']);
         Route::post('/store', [FasyankesController::class, 'storeFasyankes']);
+        Route::post('/send-otp', [FasyankesController::class, 'sendOtp']);
     });
     Route::post('/create-transaction', [PaymentController::class, 'createTransaction']);
     Route::post('/update-payment', [PaymentController::class, 'updateTransactionStatus']);
@@ -90,7 +93,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
     Route::get('/activity-log', [ActivityLogController::class, 'activity_log']);
 
-    Route::post('/change-password', [AuthController::class, 'changePassword']);
+    Route::post('/security/send-otp', [KeamananAkunController::class, 'sendOtp']);
+    Route::post('/change-password', [KeamananAkunController::class, 'changePassword']);
 
     Route::prefix('/purchase')->group(function () {
         Route::get('/', [PembelianController::class, 'getPurchase']);
