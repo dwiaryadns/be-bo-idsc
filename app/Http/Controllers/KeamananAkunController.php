@@ -103,4 +103,24 @@ class KeamananAkunController extends Controller
             'message' => 'Password Berhasil Diubah'
         ], 200);
     }
+
+    public function verify2FA()
+    {
+        $user = BisnisOwner::where('id', Auth::user()->id)->first();
+        if (!$user) {
+            return response()->json([
+               'status' => false,
+               'message' => 'User is not authenticated'
+            ], 401);
+        }
+        $user->update([
+            'is_2fa' =>!$user->is_2fa
+        ]);
+        return response()->json([
+           'status' => true,
+           'message' => '2FA status berhasil diubah'
+        ], 200);            
+    }
 }
+
+

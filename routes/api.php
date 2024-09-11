@@ -67,6 +67,8 @@ Route::middleware('check.token')->group(function () {
 });
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+    Route::get('/change-twofa', [KeamananAkunController::class, 'verify2FA']);
+
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::prefix('bo-info')->group(function () {
         Route::get('/', [BoInfoController::class, 'getBoInfo']);
