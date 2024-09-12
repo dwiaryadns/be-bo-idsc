@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\Aidiva\ApiController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -48,6 +49,8 @@ Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkE
 Route::get('/check/token/{token}', [ForgotPasswordController::class, 'checkToken']);
 Route::post('/password/reset', [ResetPasswordController::class, 'resetPassword']);
 
+
+Route::get('/list-fasyankes', [ApiController::class, 'listFasyankes']);
 
 Route::middleware('check.token')->group(function () {
     Route::get('/list-username', [AccessFasyankesController::class, 'listUsername']);
