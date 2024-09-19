@@ -41,6 +41,16 @@ class DatabaseSeeder extends Seeder
         ]);
         $bo2->markEmailAsVerified();
 
+        $bo3 = BisnisOwner::create([
+            'name' => 'PENTESTER',
+            'phone' => '08xxxxxxxxxxx',
+            'email' => 'pentester@gmail.com',
+            'email_verified_at' => now(),
+            'role' => 'pentest',
+            'password' => Hash::make('iD5M4rtC4R3**@')
+        ]);
+        $bo3->markEmailAsVerified();
+        
         $warehouse = Warehouse::create([
             'bisnis_owner_id' => 2,
             'name' => 'Warehouse Teguh Test',

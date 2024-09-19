@@ -22,6 +22,7 @@ return new class extends Migration
             $table->boolean('is_resend')->default(0);
             $table->boolean('is_first_login')->default(0);
             $table->string('img_profile')->nullable();
+            $table->string('role')->nullable();
             $table->boolean('is_2fa')->default(0);
             $table->rememberToken();
             $table->timestamps();

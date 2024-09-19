@@ -26,6 +26,7 @@ class BisnisOwner extends Authenticatable implements MustVerifyEmail
         'is_first_login',
         'img_profile',
         'email_verified_at',
+        'role',
         'is_2fa'
     ];
 
