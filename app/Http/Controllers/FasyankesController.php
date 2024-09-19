@@ -49,6 +49,10 @@ class FasyankesController extends Controller
             'longitude' => 'required',
             'address' => 'required',
             'pic' => 'required',
+            'province' => 'required',
+            'city' => 'required',
+            'subdistrict' => 'required',
+            'village' => 'required',
             'pic_number' => 'required|numeric',
             'email' => [
                 'required',
@@ -116,6 +120,10 @@ class FasyankesController extends Controller
                 'bisnis_owner_id' => $bo->id,
                 'latitude' => $request->latitude,
                 'longitude' => $request->longitude,
+                'province' => $request->province,
+                'city' => $request->city,
+                'subdistrict' => $request->subdistrict,
+                'village' => $request->village,
             ]);
 
             $accessFasyankes = AccessFasyankes::updateOrCreate([

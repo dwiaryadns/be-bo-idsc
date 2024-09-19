@@ -27,6 +27,10 @@ class Fasyankes extends Model
         'is_active',
         'latitude',
         'longitude',
+        'province',
+        'city',
+        'subdistrict',
+        'village'
     ];
     public function warehouse()
     {

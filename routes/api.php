@@ -49,8 +49,12 @@ Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkE
 Route::get('/check/token/{token}', [ForgotPasswordController::class, 'checkToken']);
 Route::post('/password/reset', [ResetPasswordController::class, 'resetPassword']);
 
-
-Route::get('/list-fasyankes', [ApiController::class, 'listFasyankes']);
+Route::middleware('aidiva.token')->group(function () {
+    Route::prefix('v1/aidiva')->group(function () {
+        Route::get('/list-fasyankes', [ApiController::class, 'listFasyankes']);
+        Route::get('/get-barang', [ApiController::class, 'getBarang']);
+    });
+});
 
 Route::middleware('check.token')->group(function () {
     Route::get('/list-username', [AccessFasyankesController::class, 'listUsername']);

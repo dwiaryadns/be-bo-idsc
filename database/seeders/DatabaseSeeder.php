@@ -67,7 +67,11 @@ class DatabaseSeeder extends Seeder
             'email' => 'teguh@gmail.com',
             'is_active' => 1,
             'latitude' => "-6.191385",
-            'longitude' => '106.8338377'
+            'longitude' => '106.8338377',
+            'province' => 'DKI Jakarta',
+            'city' => 'Jakarta Timur',
+            'subdistrict' => 'Kramat Jati',
+            'village' => 'Batu Ampar',
         ]);
         $fasyankes2 = Fasyankes::create([
             'fasyankesId' => '123456789',
@@ -81,7 +85,11 @@ class DatabaseSeeder extends Seeder
             'email' => 'arya@gmail.com',
             'is_active' => 1,
             'latitude' => "-6.191385",
-            'longitude' => '106.8338377'
+            'longitude' => '106.8338377',
+            'province' => 'DKI Jakarta',
+            'city' => 'Jakarta Timur',
+            'subdistrict' => 'Kramat Jati',
+            'village' => 'Batu Ampar',
         ]);
         $fasyankesWarehouses = [
             [
@@ -162,5 +170,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ICDXSeeder::class);
         $this->call(StockBarangsSeeder::class);
         $this->call(DiskonSeeder::class);
+        $this->call(MasterPOASeeder::class);
     }
 }

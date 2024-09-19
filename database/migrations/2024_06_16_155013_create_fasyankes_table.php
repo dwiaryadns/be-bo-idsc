@@ -22,6 +22,10 @@ return new class extends Migration
             $table->string('pic_number');
             $table->string('email');
             $table->string('latitude');
+            $table->string('province');
+            $table->string('city');
+            $table->string('subdistrict');
+            $table->string('village');
             $table->string('longitude');
             $table->boolean('is_active');
             $table->timestamps();
