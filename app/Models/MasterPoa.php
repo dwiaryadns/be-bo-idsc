@@ -8,11 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class MasterPoa extends Model
 {
     use HasFactory;
-
+    public $incrementing = false;
+    protected $primaryKey = 'id_idsc';
     protected $fillable = [
         'id_idsc',
-        'poa',
-        'pov',
         'poa_code',
+        'pov',
+        'poa'
     ];
+
+    protected $keyType = 'string';
 }
