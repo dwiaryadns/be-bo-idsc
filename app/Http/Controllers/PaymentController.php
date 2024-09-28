@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AccessFasyankes;
 use App\Models\LogTransaction;
 use App\Models\Payment;
+use App\Models\SubscriptionPlan;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -167,6 +169,20 @@ class PaymentController extends Controller
             $this->handlePayment($transaction, $notification);
             $this->handleLogTransaction($transaction, $notification);
             Log::info(json_encode($notification, true));
+
+            $getSubscription = SubscriptionPlan::with('fasyankes')
+                ->where('id', $transaction->subscription_plan_id)
+                ->first();
+            if ($getSubscription) {
+                $fasyankes = $getSubscription->fasyankes;
+                $fasyankes->update(['is_active' => 1]);
+                if ($fasyankes) {
+                    $accessFasyankes = AccessFasyankes::where('role', 'admin')
+                        ->where('fasyankes_id', $fasyankes->fasyankesId)
+                        ->first();
+                    $accessFasyankes->update(['is_active' => 1]);
+                }
+            }
             return response()->json(['message' => 'Notification processed successfully']);
         } catch (\Throwable $th) {
             Log::error('Error handling notification: ' . $th->getMessage());

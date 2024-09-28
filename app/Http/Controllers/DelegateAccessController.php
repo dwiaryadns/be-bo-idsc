@@ -51,9 +51,18 @@ class DelegateAccessController extends Controller
                 'regex:/[!@#$%^&*(),.?":{}|<>_]/',
                 'regex:/[0-9]/'
             ],
+            'password_confirmation' => [
+                'required',
+                'string',
+                'min:8',
+                'regex:/[A-Z]/',
+                'regex:/[!@#$%^&*(),.?":{}|<>_]/',
+                'regex:/[0-9]/'
+            ]
         ], [
             'password.regex' => 'Password must contain at least 1 Uppercase Word, 1 Special Character, and 1 Number',
-            'email.regex' => 'Invalid format email'
+            'email.regex' => 'Invalid format email',
+            'password_confirmation.regex' => 'Password must contain at least 1 Uppercase Word, 1 Special Character, and 1 Number'
         ]);
 
         if ($validator->fails()) {

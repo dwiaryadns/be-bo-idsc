@@ -13,28 +13,48 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    
+
     public function register(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255|regex:/^[A-Za-z\s]+$/',
-            'email' => 'required|email|max:255|unique:bisnis_owners|regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
-            'phone' => 'required',
-            'password' => [
-                'required',
-                'string',
-                'confirmed',
-                'min:8',
-                'regex:/[A-Z]/',
-                'regex:/[!@#$%^&*(),.?":{}|<>_]/',
-                'regex:/[0-9]/'
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'name' => 'required|string|max:255|regex:/^[A-Za-z\s]+$/',
+                'email' => 'required|email|max:255|unique:bisnis_owners|regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
+                'phone' => 'required|numeric|min_digits:10|max_digits:15',
+                'password' => [
+                    'required',
+                    'string',
+                    'confirmed',
+                    'min:8',
+                    'regex:/[A-Z]/',
+                    'regex:/[!@#$%^&*(),.?":{}|<>_]/',
+                    'regex:/[0-9]/'
+                ],
+                'password_confirmation' => [
+                    'required',
+                    'min:8',
+                    'regex:/[A-Z]/',
+                    'regex:/[!@#$%^&*(),.?":{}|<>_]/',
+                    'regex:/[0-9]/'
+                ]
             ],
-        ], [
-            'password.regex' => 'Password must contain at least 1 Uppercase Word, 1 Special Character, and 1 Number',
-            'email.regex' => 'Format email tidak sesuai',
-            'name.regex' => 'Format nama tidak sesuai',
-            'phone.required' => 'Phone Harus diisi.',
-        ]);
+            [
+                'email.regex' => 'Format email tidak sesuai',
+                'name.regex' => 'Format nama tidak sesuai',
+                'password.confirmed' => 'Password dan Confirmasi Password harus sama',
+                'password.min' => 'Password minimal 8 karakter',
+                'password_confirmation.min' => 'Konfirmasi Password minimal 8 karakter',
+                'password.regex' => 'Password harus memiliki minimal 1 huruf besar, 1 karakter spesial, dan 1 angka',
+                'name.required' => 'Nama Lengkap harus diisi.',
+                'email.required' => 'Email harus diisi.',
+                'phone.required' => 'Nomor HP harus diisi.',
+                'phone.min_digits' => 'Nomo HP minimal 10 digit',
+                'phone.max_digits' => 'Nomo HP maksimal 15 digit',
+                'password.required' => 'Password harus diisi.',
+                'password_confirmation.required' => 'Konfirmasi Password harus diisi.',
+            ]
+        );
 
         if ($validator->fails()) {
             $errors = collect($validator->errors())->map(function ($messages) {
@@ -162,7 +182,9 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $request->validate(
+
+        $validator = Validator::make(
+            $request->all(),
             [
                 'email' => [
                     'required',
@@ -173,6 +195,12 @@ class AuthController extends Controller
             ]
         );
 
+        if ($validator->fails()) {
+            $errors = collect($validator->errors())->map(function ($messages) {
+                return $messages[0];
+            });
+            return response()->json(['status' => false, 'errors' => $errors, 'message' => 'Login Gagal'], 422);
+        }
         $user = BisnisOwner::where('email', $request->email)->first();
 
         $delegate = DelegateAccess::where('email', $request->email)->first();

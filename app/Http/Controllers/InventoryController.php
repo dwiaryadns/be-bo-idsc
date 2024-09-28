@@ -158,6 +158,18 @@ class InventoryController extends Controller
                 422
             );
         }
+        $barangExists = Barang::where('nama_barang', $request->nama_barang)
+            ->where('supplier_id', $request->supplier_id)
+            ->exists();
+
+        if ($barangExists) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed Create Barang',
+                'errors' => ['nama_barang' => 'Nama Barang sudah ada di Supplier ini']
+            ], 422);
+        }
+
         $harga_beli = str_replace('.', '', $request->harga_beli);
         $harga_jual = str_replace('.', '', $request->harga_jual);
         $barang = Barang::create([

@@ -112,9 +112,12 @@ class SupplierController extends Controller
             ], 401);
         }
         $countSupplier = Supplier::count();
-        $supplier = Supplier::create([
+
+        $supplier = Supplier::updateOrCreate([
+            'supplier_id' => $request->supplier_id,
+        ], [
             'bisnis_owner_id' => $bo->id,
-            'supplier_id' => 'SUPPID-' . date('Y') . date('m') . str_pad($countSupplier + 1, 5, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999),
+            'supplier_id' => $request->supplier_id ?? 'SUPPID-' . date('Y') . date('m') . str_pad($countSupplier + 1, 5, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999),
             'nama_supplier' => $request->nama_supplier,
             'alamat' => $request->alamat,
             'kabupaten' => $request->kabupaten,

@@ -19,7 +19,11 @@ class ForgotPasswordController extends Controller
         $request->validate(['email' => 'required|email']);
 
         $user = BisnisOwner::where('email', $request->email)->first();
-
+        if ($user->email_verified_at == null) {
+            return response()->json([
+                'message' => 'Email belum terverifikasi, silahkan verifikasi email Anda terlebih dahulu'
+            ], 401);
+        }
         if (!$user) {
             return response()->json([
                 'message' => 'Email Not Found',

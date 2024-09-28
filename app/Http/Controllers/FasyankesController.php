@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class FasyankesController extends Controller
 {
@@ -39,9 +40,14 @@ class FasyankesController extends Controller
 
     public function storeFasyankes(Request $request)
     {
+        Log::info($request->all());
         $validator = Validator::make($request->all(), [
             'type' => 'required',
-            'username' => 'required|unique:access_fasyankes,username',
+            'username' => [
+                'required',
+                Rule::unique('access_fasyankes', 'username')
+                    ->ignore($request->fasyankesId, 'fasyankes_id'),
+            ],
             'package_plan' => 'required',
             'warehouse_id' => 'required',
             'name' => 'required',
@@ -108,7 +114,7 @@ class FasyankesController extends Controller
             $fasyankes = Fasyankes::updateOrCreate([
                 'fasyankesId' => $request->fasyankesId
             ], [
-                'fasyankesId' => $request->fasyankesId ?: rand(100000, 999999),
+                'fasyankesId' => $request->fasyankesId ?? rand(100000, 999999),
                 'type' => $request->type,
                 'warehouse_id' => $request->warehouse_id,
                 'name' => $request->name,
@@ -116,7 +122,7 @@ class FasyankesController extends Controller
                 'pic' => $request->pic,
                 'pic_number' => $request->pic_number,
                 'email' => $request->email,
-                'is_active' => 1,
+                'is_active' => 0,
                 'bisnis_owner_id' => $bo->id,
                 'latitude' => $request->latitude,
                 'longitude' => $request->longitude,
@@ -131,7 +137,7 @@ class FasyankesController extends Controller
             ], [
                 'username' => $request->username,
                 'password' => Hash::make($request->password),
-                'is_active' => 1,
+                'is_active' => 0,
                 'created_by' => $bo->name,
             ]);
 

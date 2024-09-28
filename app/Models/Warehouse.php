@@ -23,6 +23,6 @@ class Warehouse extends Model
 
     public function fasyankes()
     {
-        return $this->hasMany(Fasyankes::class);
+        return $this->hasMany(Fasyankes::class)->where('is_active', 1);
     }
 }

@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\AccessConsole;
 use App\Models\AccessFasyankes;
 use App\Models\BisnisOwner;
 use App\Models\BoInfo;
@@ -50,7 +52,20 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('iD5M4rtC4R3**@')
         ]);
         $bo3->markEmailAsVerified();
-        
+
+        AccessConsole::create([
+            'fullname' => 'Trian Radis Pengestu',
+            'email' => 'trian@gmail.com',
+            'password' => Hash::make('password'),
+            'is_active' => true
+        ]);
+        AccessConsole::create([
+            'fullname' => 'Yahyan Setiadi',
+            'email' => 'yahyan.setiadi10@gmail.com',
+            'password' => Hash::make('password'),
+            'is_active' => false
+        ]);
+
         $warehouse = Warehouse::create([
             'bisnis_owner_id' => 2,
             'name' => 'Warehouse Teguh Test',

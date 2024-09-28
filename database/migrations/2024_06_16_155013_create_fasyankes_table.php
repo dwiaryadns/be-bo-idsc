@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('subdistrict');
             $table->string('village');
             $table->string('longitude');
-            $table->boolean('is_active');
+            $table->boolean('is_active')->default(0);
             $table->timestamps();
         });
     }
