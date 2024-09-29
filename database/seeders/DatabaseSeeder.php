@@ -54,15 +54,27 @@ class DatabaseSeeder extends Seeder
         $bo3->markEmailAsVerified();
 
         AccessConsole::create([
+            'fullname' => 'Dwi Arya Putra',
+            'email' => 'arya@gmail.com',
+            'password' => password_hash('password', PASSWORD_BCRYPT, ['cost' => 10]),
+            'role' => 'admin',
+            'username' => 'ZXDWI',
+            'is_active' => true
+        ]);
+        AccessConsole::create([
             'fullname' => 'Trian Radis Pengestu',
             'email' => 'trian@gmail.com',
-            'password' => Hash::make('password'),
+            'password' => password_hash('password', PASSWORD_BCRYPT, ['cost' => 10]),
+            'role' => 'admin',
+            'username' => 'ZXTRI',
             'is_active' => true
         ]);
         AccessConsole::create([
             'fullname' => 'Yahyan Setiadi',
             'email' => 'yahyan.setiadi10@gmail.com',
-            'password' => Hash::make('password'),
+            'password' => password_hash('password', PASSWORD_BCRYPT, ['cost' => 10]),
+            'role' => 'admin',
+            'username' => 'ZXYAN',
             'is_active' => false
         ]);
 
