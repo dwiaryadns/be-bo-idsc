@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('village');
             $table->string('postal_code');
             $table->string('status')->nullable();
+            $table->text('reason')->nullable();
             $table->timestamps();
         });
     }

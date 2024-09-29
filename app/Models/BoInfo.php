@@ -24,6 +24,7 @@ class BoInfo extends Model
         'village',
         'postal_code',
         'status',
+        'reason'
     ];
 
     public function bisnis_owner()

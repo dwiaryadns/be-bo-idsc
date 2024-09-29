@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('nib')->nullable();
             $table->string('iso')->nullable();
             $table->string('status')->nullable();
+            $table->text('reason')->nullable();
             $table->timestamps();
         });
     }

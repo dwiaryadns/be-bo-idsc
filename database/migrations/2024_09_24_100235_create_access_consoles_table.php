@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('access_consoles', function (Blueprint $table) {
             $table->id();
             $table->string('fullname');
+            $table->string('username')->unique();
             $table->string('email');
             $table->string('password');
             $table->string('role');

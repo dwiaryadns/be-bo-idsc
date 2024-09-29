@@ -20,6 +20,7 @@ class LegalDocBo extends Model
         'nib',
         'iso',
         'status',
+        'reason'
     ];
 
     public function bisnis_owner()
