@@ -147,10 +147,23 @@ class PaymentController extends Controller
             $transaction->gross_amount = $grossAmount;
             $transaction->subscription_plan_id = $customField1;
 
+            $getSubscription = SubscriptionPlan::with('fasyankes')
+                ->where('id', $transaction->subscription_plan_id)
+                ->first();
             if ($transactionStatus == 'capture') {
                 if ($fraudStatus == 'challenge') {
                     $transaction->transaction_status = 'challenge';
                 } else {
+                    if ($getSubscription) {
+                        $fasyankes = $getSubscription->fasyankes;
+                        $fasyankes->update(['is_active' => 1]);
+                        if ($fasyankes) {
+                            $accessFasyankes = AccessFasyankes::where('role', 'admin')
+                                ->where('fasyankes_id', $fasyankes->fasyankesId)
+                                ->first();
+                            $accessFasyankes->update(['is_active' => 1]);
+                        }
+                    }
                     $transaction->transaction_status = 'success';
                 }
             } elseif ($transactionStatus == 'settlement') {
@@ -170,19 +183,7 @@ class PaymentController extends Controller
             $this->handleLogTransaction($transaction, $notification);
             Log::info(json_encode($notification, true));
 
-            $getSubscription = SubscriptionPlan::with('fasyankes')
-                ->where('id', $transaction->subscription_plan_id)
-                ->first();
-            if ($getSubscription) {
-                $fasyankes = $getSubscription->fasyankes;
-                $fasyankes->update(['is_active' => 1]);
-                if ($fasyankes) {
-                    $accessFasyankes = AccessFasyankes::where('role', 'admin')
-                        ->where('fasyankes_id', $fasyankes->fasyankesId)
-                        ->first();
-                    $accessFasyankes->update(['is_active' => 1]);
-                }
-            }
+
             return response()->json(['message' => 'Notification processed successfully']);
         } catch (\Throwable $th) {
             Log::error('Error handling notification: ' . $th->getMessage());

@@ -51,6 +51,13 @@ class Fasyankes extends Model
     {
         return $this->hasOne(LegalDocFasyankes::class, 'fasyankes_id', 'fasyankesId');
     }
+
+    public function subscription_plan()
+    {
+        return $this->hasOne(SubscriptionPlan::class, 'fasyankes_id', 'fasyankesId')
+            ->select('package_plan', 'duration', 'id', 'fasyankes_id')
+            ->orderBy('created_at', 'DESC');
+    }
     protected $casts = [
         'is_active' => 'boolean',
     ];

@@ -60,9 +60,18 @@ class DelegateAccessController extends Controller
                 'regex:/[0-9]/'
             ]
         ], [
-            'password.regex' => 'Password must contain at least 1 Uppercase Word, 1 Special Character, and 1 Number',
-            'email.regex' => 'Invalid format email',
-            'password_confirmation.regex' => 'Password must contain at least 1 Uppercase Word, 1 Special Character, and 1 Number'
+            'name' => 'Nama harus diisi.',
+            'role' => 'ROle harus diisi.',
+            'email' => 'Email harus diisi.',
+            'email.regex' => 'Format Email tidak valid',
+            'email.unique' => 'Email sudah terdaftar',
+            'password.required' => 'Password harus diisi.',
+            'password.regex' => 'Password harus memiliki minimal 1 huruf besar, 1 karakter spesial, dan 1 angka',
+            'password.confirmed' => 'Password dan Konfirmasi Password harus sama',
+            'password.min' => 'Password minimal 8 karakter',
+            'password_confirmation.min' => 'Konfirmasi Password minimal 8 karakter',
+            'password_confirmation.required' => 'Konfirmasi Password harus diisi.',
+            'password_confirmation.regex' => 'Konfirmasi Password harus memiliki minimal 1 huruf besar, 1 karakter spesial, dan 1 angka',
         ]);
 
         if ($validator->fails()) {
@@ -94,15 +103,13 @@ class DelegateAccessController extends Controller
             log_activity("Memberikan Akses $request->role kepada $request->email", 'Hak Akses', Auth::guard('bisnis_owner')->user()->name, 1);
             return response()->json([
                 'status' => true,
-                'message' => 'Success add delegate access',
+                'message' => 'Berhasil Menambahkan Hak Akses',
                 'data' => $delegate
             ]);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
-                'errors' => 'Terjadi kesalahan saat menyimpan data',
-                'message' => 'Gagal Delegate',
-                'log' => $th->getLine() . $th->getMessage()
+                'message' => 'Gagal Menambahkan Hak Akses',
             ]);
         }
     }

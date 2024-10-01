@@ -47,7 +47,7 @@ class WarehouseController extends Controller
             $errors = collect($validator->errors())->map(function ($messages) {
                 return $messages[0];
             });
-            return response()->json(['status' => false, 'message' => 'Failed Create Fasyankes', 'errors' => $errors], 422);
+            return response()->json(['status' => false, 'message' => 'Gagal Menambahkan Gudang', 'errors' => $errors], 422);
         }
 
         $user = Auth::guard('bisnis_owner')->user();

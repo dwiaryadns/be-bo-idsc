@@ -42,17 +42,18 @@ class AuthController extends Controller
             [
                 'email.regex' => 'Format email tidak sesuai',
                 'name.regex' => 'Format nama tidak sesuai',
-                'password.confirmed' => 'Password dan Confirmasi Password harus sama',
-                'password.min' => 'Password minimal 8 karakter',
-                'password_confirmation.min' => 'Konfirmasi Password minimal 8 karakter',
+                'password.required' => 'Password harus diisi.',
                 'password.regex' => 'Password harus memiliki minimal 1 huruf besar, 1 karakter spesial, dan 1 angka',
+                'password.confirmed' => 'Password dan Konfirmasi Password harus sama',
+                'password.min' => 'Password minimal 8 karakter',
                 'name.required' => 'Nama Lengkap harus diisi.',
                 'email.required' => 'Email harus diisi.',
                 'phone.required' => 'Nomor HP harus diisi.',
                 'phone.min_digits' => 'Nomo HP minimal 10 digit',
                 'phone.max_digits' => 'Nomo HP maksimal 15 digit',
-                'password.required' => 'Password harus diisi.',
+                'password_confirmation.min' => 'Konfirmasi Password minimal 8 karakter',
                 'password_confirmation.required' => 'Konfirmasi Password harus diisi.',
+                'password_confirmation.regex' => 'Password harus memiliki minimal 1 huruf besar, 1 karakter spesial, dan 1 angka',
             ]
         );
 
@@ -277,10 +278,6 @@ class AuthController extends Controller
             'Authorization: Bearer ' . $request->header('Authorization'),
             'Content-Type: application/json',
         ];
-
-        $bo = BisnisOwner::where('email', $request->email)->first();
-
-
         $data = [
             'otp_id' => $request->input('otp_id'),
             'otp' => $request->otp,
@@ -298,10 +295,18 @@ class AuthController extends Controller
         curl_close($ch);
 
         if ($error) {
-            return response()->json(['error' => $error], 500);
+            return response()->json(['error' => $error, 'message' => 'Verifikasi Gagal'], 500);
         }
+        Log::info('error store otp');
         Log::info($response);
-        if ($bo) {
+
+        $isRegister = $request->is_register;
+        $bo = BisnisOwner::where('email', $request->email)->first();
+
+        $data = json_decode($response, true);
+        $status = $data['status'] ? true : false;
+        if ($status && $isRegister) {
+            Log::info('berhasil');
             $bo->markEmailAsVerified();
         }
         return response()->json(json_decode($response, true));

@@ -21,7 +21,7 @@ class FasyankesController extends Controller
     public function getFasyankes()
     {
         $bo = Auth::guard('bisnis_owner')->user();
-        $fasyankes = Fasyankes::with('warehouse', 'legal_doc')
+        $fasyankes = Fasyankes::with('warehouse', 'legal_doc', 'subscription_plan')
             ->where('bisnis_owner_id', $bo->id)
             ->get();
 
@@ -195,6 +195,7 @@ class FasyankesController extends Controller
             'gateway_key' => env('GATEWAY_KEY'),
         ];
 
+        Log::info($email);
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
@@ -216,6 +217,7 @@ class FasyankesController extends Controller
     {
         $email  = $request->email;
         $getOtp = $this->getOtp($email);
+        Log::info('email : ' . $email);
         if ($getOtp['status'] === false) {
             return response()->json(['status' => false, 'message' => 'Email tidak valid, periksa kembali email yang Anda gunakan.']);
         }
