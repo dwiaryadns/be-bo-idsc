@@ -122,7 +122,7 @@ class FasyankesController extends Controller
                 'pic' => $request->pic,
                 'pic_number' => $request->pic_number,
                 'email' => $request->email,
-                'is_active' => 0,
+                'is_active' => $request->package_plan === 'FREE' ? 1 : 0,
                 'bisnis_owner_id' => $bo->id,
                 'latitude' => $request->latitude,
                 'longitude' => $request->longitude,
@@ -137,7 +137,7 @@ class FasyankesController extends Controller
             ], [
                 'username' => $request->username,
                 'password' => Hash::make($request->password),
-                'is_active' => 0,
+                'is_active' => $request->package_plan === 'FREE' ? 1 : 0,
                 'created_by' => $bo->name,
             ]);
 

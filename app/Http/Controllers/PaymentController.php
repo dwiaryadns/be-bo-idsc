@@ -49,7 +49,7 @@ class PaymentController extends Controller
                 "email" => $request->email,
                 "phone" => $request->pic_number,
             ],
-            'enabled_payments' => ['bank_transfer', 'gopay', 'shopeepay', 'qris', 'other_qris'],
+            'enabled_payments' => ['bank_transfer'],
             'expiry' => [
                 'start_time' => date('Y-m-d H:i:s T', strtotime('now')),
                 'unit' => 'minutes',
@@ -72,6 +72,45 @@ class PaymentController extends Controller
     }
 
 
+    // public function handlePayment($transaction, $notification)
+    // {
+    //     if ($transaction) {
+    //         $paymentType = $notification->payment_type ?? null;
+    //         $acquirer = $notification->acquirer ?? null;
+    //         $fraudStatus = $notification->fraud_status ?? null;
+    //         $expiryTime = $notification->expiry_time ?? null;
+    //         // $qris = $notication->action ?? null;
+    //         // Log::info($qris);
+    //         $urlQr = null;
+    //         if ($acquirer == 'airpay shopee') {
+    //             $urlQr = "https://api.sandbox.midtrans.com/v2/qris/shopeepay/sppq_" . $transaction->transaction_id . "/qr-code";
+    //         } else if ($acquirer == 'gopay') {
+    //             $urlQr = "https://api.sandbox.midtrans.com/v2/qris/" . $transaction->transaction_id . "/qr-code";
+    //         }
+    //         // if ($qris != null) {
+    //         //     $getQrF = $qris['generate-qr-code'];
+    //         //     if ($getQrF) {
+    //         //         $urlQr = $qris['url'];
+    //         //     }
+    //         // }
+    //         $vaNumber = isset($notification->va_numbers[0]) ? $notification->va_numbers[0]->va_number : null;
+    //         $bank = isset($notification->va_numbers[0]) ? $notification->va_numbers[0]->bank : null;
+
+    //         $payment = Payment::updateOrCreate([
+    //             'transaction_id' => $transaction->id,
+    //         ], [
+    //             'payment_type' => $paymentType,
+    //             'acquirer' => $acquirer,
+    //             'fraud_status' => $fraudStatus,
+    //             'expired_at' => $expiryTime,
+    //             'va_number' => $vaNumber,
+    //             'bank' => $bank,
+    //             'url_qr' => $urlQr
+    //         ]);
+
+    //         Log::info('Payment : ' . $payment);
+    //     }
+    // }
     public function handlePayment($transaction, $notification)
     {
         if ($transaction) {
@@ -80,12 +119,9 @@ class PaymentController extends Controller
             $fraudStatus = $notification->fraud_status ?? null;
             $expiryTime = $notification->expiry_time ?? null;
 
-            $urlQr = null;
-            if ($acquirer == 'airpay shopee') {
-                $urlQr = "https://api.sandbox.midtrans.com/v2/qris/shopeepay/sppq_" . $transaction->transaction_id . "/qr-code";
-            } else if ($acquirer == 'gopay') {
-                $urlQr = "https://api.sandbox.midtrans.com/v2/qris/" . $transaction->transaction_id . "/qr-code";
-            }
+            // Ambil URL QR code dari notifikasi jika ada
+            $urlQr = isset($notification->actions) ? collect($notification->actions)->firstWhere('name', 'generate-qr-code')['url'] : null;
+
             $vaNumber = isset($notification->va_numbers[0]) ? $notification->va_numbers[0]->va_number : null;
             $bank = isset($notification->va_numbers[0]) ? $notification->va_numbers[0]->bank : null;
 
@@ -98,12 +134,13 @@ class PaymentController extends Controller
                 'expired_at' => $expiryTime,
                 'va_number' => $vaNumber,
                 'bank' => $bank,
-                'url_qr' => $urlQr
+                'url_qr' => $urlQr // Simpan QR URL di database
             ]);
 
             Log::info('Payment : ' . $payment);
         }
     }
+
 
     public function handleLogTransaction($transaction, $notification)
     {
@@ -147,23 +184,11 @@ class PaymentController extends Controller
             $transaction->gross_amount = $grossAmount;
             $transaction->subscription_plan_id = $customField1;
 
-            $getSubscription = SubscriptionPlan::with('fasyankes')
-                ->where('id', $transaction->subscription_plan_id)
-                ->first();
+
             if ($transactionStatus == 'capture') {
                 if ($fraudStatus == 'challenge') {
                     $transaction->transaction_status = 'challenge';
                 } else {
-                    if ($getSubscription) {
-                        $fasyankes = $getSubscription->fasyankes;
-                        $fasyankes->update(['is_active' => 1]);
-                        if ($fasyankes) {
-                            $accessFasyankes = AccessFasyankes::where('role', 'admin')
-                                ->where('fasyankes_id', $fasyankes->fasyankesId)
-                                ->first();
-                            $accessFasyankes->update(['is_active' => 1]);
-                        }
-                    }
                     $transaction->transaction_status = 'success';
                 }
             } elseif ($transactionStatus == 'settlement') {
@@ -183,6 +208,21 @@ class PaymentController extends Controller
             $this->handleLogTransaction($transaction, $notification);
             Log::info(json_encode($notification, true));
 
+            if ($transaction->transaction_status == 'success') {
+                $getSubscription = SubscriptionPlan::with('fasyankes')
+                    ->where('id', $transaction->subscription_plan_id)
+                    ->first();
+                if ($getSubscription) {
+                    $fasyankes = $getSubscription->fasyankes;
+                    $fasyankes->update(['is_active' => 1]);
+                    if ($fasyankes) {
+                        $accessFasyankes = AccessFasyankes::where('role', 'admin')
+                            ->where('fasyankes_id', $fasyankes->fasyankesId)
+                            ->first();
+                        $accessFasyankes->update(['is_active' => 1]);
+                    }
+                }
+            }
 
             return response()->json(['message' => 'Notification processed successfully']);
         } catch (\Throwable $th) {

@@ -79,7 +79,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::prefix('bo-info')->group(function () {
         Route::get('/', [BoInfoController::class, 'getBoInfo']);
-        Route::post('/store', [BoInfoController::class, 'storeBoIfo']);
+        Route::post('/store', [BoInfoController::class, 'storeBoInfo']);
     });
     Route::prefix('warehouses')->group(function () {
         Route::get('/', [WarehouseController::class, 'getWarehouses']);

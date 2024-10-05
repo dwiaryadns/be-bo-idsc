@@ -28,7 +28,6 @@ class ApiController extends Controller
             ]);
         }
     }
-
     public function getBarang(Request $request)
     {
         $perPage = $request->get('per_page', 10);

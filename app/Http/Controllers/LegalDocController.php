@@ -40,7 +40,12 @@ class LegalDocController extends Controller
         $rules = [
             'iso' => 'nullable|file|mimes:pdf|max:' . $maxFileSize,
             'password' => [
-                'required', 'string', 'min:8', 'regex:/[A-Z]/', 'regex:/[!@#$%^&*(),.?":{}|<>_]/', 'regex:/[0-9]/'
+                'required',
+                'string',
+                'min:8',
+                'regex:/[A-Z]/',
+                'regex:/[!@#$%^&*(),.?":{}|<>_]/',
+                'regex:/[0-9]/'
             ],
             [
                 'password.regex' => 'Password must contain at least 1 Uppercase Word, 1 Special Character, and 1 Number',
@@ -165,7 +170,9 @@ class LegalDocController extends Controller
             $uploadedFileUrls = $this->uploadAndEncryptFiles($request, $name);
 
             Log::info($uploadedFileUrls);
-            $legalDoc = LegalDocBo::create([
+            $legalDoc = LegalDocBo::updateOrCreate([
+                'id' => $request->id
+            ], [
                 'bisnis_owner_id' => $bo->id,
                 'ktp' => $uploadedFileUrls['ktp'] ?? null,
                 'akta' => $uploadedFileUrls['akta'] ?? null,
@@ -177,8 +184,9 @@ class LegalDocController extends Controller
             ]);
 
             Log::info('Legal document created successfully');
-            log_activity("Upload Dokumen Legal Bisnis Owner", "Dokumen Legal", Auth::guard('bisnis_owner')->user()->name,1);
+            log_activity("Upload Dokumen Legal Bisnis Owner", "Dokumen Legal", Auth::guard('bisnis_owner')->user()->name, 1);
             return response()->json([
+                'status' => true,
                 'message' => 'Upload Dokument Legal Berhasil',
                 'files' => $uploadedFileUrls,
                 'legal_doc' => $legalDoc,
@@ -186,6 +194,7 @@ class LegalDocController extends Controller
         } catch (\Exception $e) {
             Log::error('Error uploading and encrypting files: ' . $e->getMessage());
             return response()->json([
+                'status' => false,
                 'message' => 'Upload Legal Document Gagal',
                 'error' => $e->getMessage(),
             ], 500);
@@ -203,7 +212,9 @@ class LegalDocController extends Controller
         $getFasyankes = Fasyankes::where('fasyankesId', $request->fasyankes_id)->first();
         if (empty($getFasyankes)) {
             Log::warning('Fasyankes not found for fasyankes_id: ' . $request->fasyankes_id);
+            Log::info($request->all());
             return response()->json([
+                'status' => false,
                 'message' => 'Fasyankes not found',
             ], 404);
         }
@@ -222,8 +233,9 @@ class LegalDocController extends Controller
                 'siok' => $uploadedFileUrls['siok'] ?? null,
             ]);
 
-            log_activity('Upload Dokumen Legal Fasyankes', "Fasyankes", Auth::guard('bisnis_owner')->user()->name,1);
+            log_activity('Upload Dokumen Legal Fasyankes', "Fasyankes", Auth::guard('bisnis_owner')->user()->name, 1);
             return response()->json([
+                'status' => true,
                 'message' => 'Upload Dokumen Legal Berhasil',
                 'files' => $uploadedFileUrls,
                 'legal_doc' => $legalDoc,
@@ -231,6 +243,7 @@ class LegalDocController extends Controller
         } catch (\Exception $e) {
             Log::error('Error uploading and encrypting files for Fasyankes: ' . $e->getMessage());
             return response()->json([
+                'status' => false,
                 "message" => "Upload Dokumen Legal Gagal",
                 'error' => $e->getMessage(),
             ], 500);

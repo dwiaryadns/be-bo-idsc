@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class ActivityLogController extends Controller
 {
@@ -20,6 +21,24 @@ class ActivityLogController extends Controller
             ], 401);
         }
 
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'page' => 'numeric',
+                'per_page' => 'numeric',
+                'start_date' => 'date',
+                'end_date' => 'date',
+                'search' => ['nullable', 'string', 'regex:/^[^%_\\\\\'\";]*$/'],
+            ]
+        );
+
+        if ($validator->fails()) {
+            $errors = collect($validator->errors())->map(function ($messages) {
+                return $messages[0];
+            });
+            return response()->json(['status' => false, 'errors' => $errors, 'message' => 'Login Gagal'], 422);
+        }
+
         $perPage = $request->get('per_page', 10);
         $page = $request->get('page', 1);
         $search = $request->get('search', '');
@@ -29,12 +48,8 @@ class ActivityLogController extends Controller
 
         $query = ActivityLog::query();
 
-        // ->addDay()->format('Y-m-d')
         $startDateFormat = Carbon::parse($startDate);
         $endDateFormat = Carbon::parse($endDate);
-        Log::info('-------------');
-        Log::info($startDate . ' ' . $startDateFormat);
-        Log::info($endDate . ' ' . $endDateFormat);
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->whereRaw('LOWER(activity_by) LIKE ?', ['%' . strtolower($search) . '%'])
@@ -45,13 +60,10 @@ class ActivityLogController extends Controller
 
         Log::info($startDate === $endDate);
         if (($startDate === $endDate) && $isSearch) {
-            Log::info('SATU TANGGAL');
             $query->whereDate('activity_at', $endDateFormat->addDay()->format('Y-m-d'));
         } else if ((!empty($startDate) && !empty($endDate)) && $isSearch) {
-            Log::info('DUA TANGGAL');
             $query->whereBetween('activity_at', [$startDateFormat->subDay()->format('Y-m-d'), $endDateFormat->addDays(2)->format('Y-m-d')]);
         } else if (!$isSearch) {
-            Log::info('TANPA TANGGAL');
             $query->whereMonth('activity_at', date('m'));
         }
 
