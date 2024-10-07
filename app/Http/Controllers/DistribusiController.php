@@ -42,7 +42,7 @@ class DistribusiController extends Controller
         }
         return response()->json([
             'status' => true,
-            'message' => 'Success get distribusi',
+            'message' => 'Berhasil Get Data.',
             'data' => $data
         ], 200);
     }
@@ -52,7 +52,7 @@ class DistribusiController extends Controller
         if (!$bo) {
             return response()->json([
                 'status' => false,
-                'message' => 'User is not authenticated'
+                'message' => 'Pengguna tidak terautentikasi',
             ], 401);
         }
 
@@ -168,7 +168,7 @@ class DistribusiController extends Controller
             log_activity("Distribusi dari {$getWfid->warehouse->name} ke {$getWfid->fasyankes->name}", "Distribusi Barang", Auth::guard('bisnis_owner')->user()->name, 1);
             return response()->json([
                 'status' => true,
-                'message' => 'Distribusi created successfully',
+                'message' => 'Berhasil',
                 'data' => $distribusi
             ], 201);
         } catch (\Exception $e) {
@@ -176,7 +176,7 @@ class DistribusiController extends Controller
             DB::rollBack();
             return response()->json([
                 'status' => false,
-                'message' => 'Internal Server Error',
+                'message' => 'Gagal',
                 'error' => $e->getMessage()
             ], 500);
         }

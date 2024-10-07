@@ -18,7 +18,7 @@ class DelegateAccessController extends Controller
         if (!$bo) {
             return response()->json([
                 'status' => false,
-                'message' => 'User is not authenticated'
+                'message' => 'Pengguna tidak terautentikasi.'
             ]);
         }
         $delegate = DelegateAccess::with('hak_akses')->where('bisnis_owner_id', $bo->id)->get();
@@ -35,7 +35,7 @@ class DelegateAccessController extends Controller
         if (!$bo) {
             return response()->json([
                 'status' => false,
-                'message' => 'User is not authenticated'
+                'message' => 'Pengguna tidak terautentikasi.'
             ]);
         }
         $validator = Validator::make($request->all(), [
@@ -78,7 +78,7 @@ class DelegateAccessController extends Controller
             $errors = collect($validator->errors())->map(function ($messages) {
                 return $messages[0];
             });
-            return response()->json(['status' => false, 'errors' => $errors, 'message' => 'Gagal Delegate'], 422);
+            return response()->json(['status' => false, 'errors' => $errors, 'message' => 'Gagal'], 422);
         }
 
         try {
@@ -103,13 +103,13 @@ class DelegateAccessController extends Controller
             log_activity("Memberikan Akses $request->role kepada $request->email", 'Hak Akses', Auth::guard('bisnis_owner')->user()->name, 1);
             return response()->json([
                 'status' => true,
-                'message' => 'Berhasil Menambahkan Hak Akses',
+                'message' => 'Berhasil',
                 'data' => $delegate
             ]);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
-                'message' => 'Gagal Menambahkan Hak Akses',
+                'message' => 'Gagal',
             ]);
         }
     }

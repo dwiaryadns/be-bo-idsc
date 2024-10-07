@@ -25,7 +25,7 @@ class PenerimaanController extends Controller
         if (!$bo) {
             return response()->json([
                 'status' => false,
-                'message' => 'User is not authenticated'
+                'message' => 'Pengguna tidak terautentikasi.'
             ]);
         }
 
@@ -58,7 +58,7 @@ class PenerimaanController extends Controller
         if (!$request->has('po_id') || $request->po_id == null || $request->po_id == '') {
             return response()->json([
                 'status' => false,
-                'message' => 'PO ID is required'
+                'message' => 'PO ID wajib diisi.'
             ], 400);
         }
         $poId = strtoupper($request->po_id);
@@ -69,13 +69,13 @@ class PenerimaanController extends Controller
         if (!$pembelian) {
             return response()->json([
                 'status' => false,
-                'message' => 'PO ID not found'
+                'message' => 'PO ID tidak ditemukan.'
             ], 404);
         }
         if ($pembelian->status === 'Received') {
             return response()->json([
                 'status' => false,
-                'message' => 'PO has already been received'
+                'message' => 'PO sudah diterima'
             ], 422);
         }
 
@@ -98,7 +98,7 @@ class PenerimaanController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Success Get Penerimaan By PO ID',
+            'message' => 'Berhasil',
             'data' => $data
         ]);
     }
@@ -134,7 +134,7 @@ class PenerimaanController extends Controller
                 return $messages[0];
             });
             Log::error('Validation Errors:', $errors->toArray());
-            return response()->json(['status' => false, 'errors' => $errors, 'message' => 'Failed Create Good Receipt'], 422);
+            return response()->json(['status' => false, 'errors' => $errors, 'message' => 'Gagal'], 422);
         }
 
         try {
@@ -230,14 +230,14 @@ class PenerimaanController extends Controller
             log_activity("Penerimaan Barang untuk $getWarehouse->name", "Penerimaan Barang", Auth::guard('bisnis_owner')->user()->name, 1);
             return response()->json([
                 'status' => true,
-                'message' => 'Penerimaan Berhasil Dibuat',
+                'message' => 'Berhasil',
             ], 200);
         } catch (\Throwable $th) {
             DB::rollBack();
             Log::error('Exception Caught:', ['error' => $th->getMessage()]);
             return response()->json([
                 'status' => false,
-                'message' => 'Penerimaan Gagal Dibuat',
+                'message' => 'Gagal',
                 'error' => $th->getMessage(),
             ], 500);
         }

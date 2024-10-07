@@ -90,7 +90,7 @@ class KeamananAkunController extends Controller
         if (!$user || !Hash::check($request->old_password, $user->password)) {
             return response()->json([
                 'status' => false,
-                'message' => 'Invalid old password'
+                'message' => 'Password Lama tidak valid.'
             ], 401);
         }
 
@@ -100,7 +100,7 @@ class KeamananAkunController extends Controller
         log_activity('Melakukan Ubah Password', 'Keamanan Akun', $user->name, 1);
         return response()->json([
             'status' => true,
-            'message' => 'Password Berhasil Diubah'
+            'message' => 'Berhasil '
         ], 200);
     }
 
@@ -109,18 +109,16 @@ class KeamananAkunController extends Controller
         $user = BisnisOwner::where('id', Auth::user()->id)->first();
         if (!$user) {
             return response()->json([
-               'status' => false,
-               'message' => 'User is not authenticated'
+                'status' => false,
+                'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
         $user->update([
-            'is_2fa' =>!$user->is_2fa
+            'is_2fa' => !$user->is_2fa
         ]);
         return response()->json([
-           'status' => true,
-           'message' => '2FA status berhasil diubah'
-        ], 200);            
+            'status' => true,
+            'message' => 'Berhasil'
+        ], 200);
     }
 }
-
-

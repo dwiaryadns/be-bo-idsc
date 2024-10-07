@@ -17,7 +17,7 @@ class ActivityLogController extends Controller
         if (!$bo) {
             return response()->json([
                 'status' => false,
-                'message' => 'User is not authenticated'
+                'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
 
@@ -73,7 +73,7 @@ class ActivityLogController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Success Get Activity Log',
+            'message' => 'Berhasil Get Data',
             'data' => $logs
         ], 200);
     }

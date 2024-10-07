@@ -76,35 +76,35 @@ class FasyankesController extends Controller
             ],
             'password_confirmation' => 'required',
         ], [
-            'type.required' => 'Type of Fasyankes is required',
-            'username.required' => 'Username is required',
-            'username.unique' => 'Username is registered',
-            'package_plan.required' => 'Package Plan is required',
-            'warehouse_id.required' => 'Warehouse is required',
-            'name.required' => 'Name Fasyankes is required',
-            'latitude.required' => 'Latitude is required',
-            'longitude.required' => 'Longitude is required',
-            'address.required' => 'Address is required',
-            'pic.required' => 'PIC is required',
-            'pic_number.required' => 'PIC Phone Number is required',
-            'pic_number.numeric' => 'PIC Phone Number field must be a number.',
-            'email.required' => 'Email is required',
-            'email.email' => 'Email is not valid',
-            'password.regex' => 'Password must contain at least 1 Uppercase Word, 1 Special Character, and 1 Number',
+            'type.required' => 'Tipe Fasyankes wajib diisi.',
+            'username.required' => 'Username wajib diisi.',
+            'username.unique' => 'Username sudah terdaftar.',
+            'package_plan.required' => 'Paket Plan wajib diisi.',
+            'warehouse_id.required' => 'Gudang wajib diisi.',
+            'name.required' => 'Nama Fasyankes wajib diisi.',
+            'latitude.required' => 'Latitude wajib diisi.',
+            'longitude.required' => 'Longitude wajib diisi.',
+            'address.required' => 'Alamat wajib diisi.',
+            'pic.required' => 'PIC wajib diisi.',
+            'pic_number.required' => 'Nomor Telepon PIC wajib diisi.',
+            'pic_number.numeric' => 'Nomor Telepon PIC harus berupa angka.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'password.regex' => 'Password harus mengandung minimal 1 huruf kapital, 1 karakter khusus, dan 1 angka.',
         ]);
 
         if ($validator->fails()) {
             $errors = collect($validator->errors())->map(function ($messages) {
                 return $messages[0];
             });
-            return response()->json(['status' => false, 'message' => 'Failed Create Fasyankes', 'errors' => $errors], 422);
+            return response()->json(['status' => false, 'message' => 'Gagal', 'errors' => $errors], 422);
         }
 
         $bo = Auth::guard('bisnis_owner')->user();
         if (empty($bo)) {
             return response()->json([
                 'status' => false,
-                'message' => 'User is not authenticated'
+                'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
 
@@ -168,14 +168,14 @@ class FasyankesController extends Controller
             DB::rollback();
             return response()->json([
                 'status' => false,
-                'message' => 'Gagal Menambahkan Fasyankes',
+                'message' => 'Gagal',
             ]);
         }
         log_activity("Menambahkan Fasyankes $request->type $request->name", "Fasyankes", $bo->name, 1);
         if ($fasyankes) {
             return response()->json([
                 'status' => true,
-                'message' => 'Berhasil Menambahkan Fasyankes',
+                'message' => 'Berhasil',
                 'data' => $fasyankes,
                 'subscription' => $subscriptionPlan,
             ], 200);

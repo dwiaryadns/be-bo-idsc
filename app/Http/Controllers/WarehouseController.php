@@ -36,11 +36,11 @@ class WarehouseController extends Controller
             'pic' => 'required|string',
             'contact' => 'required|numeric'
         ], [
-            'name.required' => 'The Warehouse Name field is required',
-            'address.required' => 'The Warehouse Address field is required',
-            'pic.required' => 'The PIC Name field is required',
-            'contact.required' => 'The PIC Number field is required',
-            'contact.numeric' => 'The PIC Number field must be a number'
+            'name.required' => 'Nama Gudang wajib diisi.',
+            'address.required' => 'Alamat Gudang wajib diisi.',
+            'pic.required' => 'Nama PIC wajib diisi.',
+            'contact.required' => 'Nomor Telepon PIC wajib diisi.',
+            'contact.numeric' => 'Nomor Telepon PIC harus berupa angka.',
         ]);
 
         if ($validator->fails()) {
@@ -52,10 +52,10 @@ class WarehouseController extends Controller
 
         $user = Auth::guard('bisnis_owner')->user();
         if (empty($user)) {
-            Log::error('User is not authenticated');
+            Log::error('Pengguna tidak terautentikasi.');
             return response()->json([
                 'status' => false,
-                'message' => 'User is not authenticated'
+                'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
         $warehouse = Warehouse::create(
@@ -71,7 +71,7 @@ class WarehouseController extends Controller
         if ($warehouse) {
             return response()->json([
                 'status' => true,
-                'message' => 'Success create warehouse',
+                'message' => 'Berhasil',
                 'data' => $warehouse
             ], 200);
         }
@@ -86,7 +86,7 @@ class WarehouseController extends Controller
             if (!$request->has('warehouse_id')) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Warehouse is required'
+                    'message' => 'Gudang wajib diisi.'
                 ], 400);
             }
 
@@ -94,7 +94,7 @@ class WarehouseController extends Controller
             if (!$checkWh) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Warehouse not found'
+                    'message' => 'Gudang not found'
                 ], 404);
             }
             $whId = $request->get('warehouse_id');
@@ -125,7 +125,7 @@ class WarehouseController extends Controller
         $barangs = $query->with('warehouse', 'barang.supplier')->where('warehouse_id', $whId)->paginate($perPage, ['*'], 'page', $page);
         return response()->json([
             'status' => true,
-            'message' => 'Success Get Stock Gudang',
+            'message' => 'Berhasil',
             'data' => $barangs
         ], 200);
     }
@@ -148,7 +148,7 @@ class WarehouseController extends Controller
         return response()->json([
             'status' => true,
             'data' => $barang,
-            'message' => 'Berhasil Update'
+            'message' => 'Berhasil'
         ], 200);
     }
 }

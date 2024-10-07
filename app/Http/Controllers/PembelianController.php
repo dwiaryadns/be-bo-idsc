@@ -78,7 +78,7 @@ class PembelianController extends Controller
         if (!$bo) {
             return response()->json([
                 'status' => false,
-                'message' => 'User is not authenticated'
+                'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
 
@@ -135,7 +135,7 @@ class PembelianController extends Controller
             });
             return response()->json([
                 'status' => false,
-                'message' => 'Pembelian Gagal',
+                'message' => 'Gagal',
                 'errors' => $errors
             ], 422);
         }
@@ -210,7 +210,7 @@ class PembelianController extends Controller
         log_activity("Pemesanan Barang untuk $getWarehouse->name", "Pemesanan Barang", Auth::guard('bisnis_owner')->user()->name, 1);
         return response()->json([
             'status' => true,
-            'message' => 'Purchase Successfully',
+            'message' => 'Berhasil',
         ], 200);
     }
 

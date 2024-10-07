@@ -61,7 +61,7 @@ class AuthController extends Controller
             $errors = collect($validator->errors())->map(function ($messages) {
                 return $messages[0];
             });
-            return response()->json(['status' => false, 'errors' => $errors], 422);
+            return response()->json(['status' => false, 'message' => 'Gagal', 'errors' => $errors], 422);
         }
         Log::info($request->all());
         $getOtp = $this->getOtp($request->email);
@@ -87,7 +87,7 @@ class AuthController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Registration Successfully',
+            'message' => 'Berhasil Register',
             'user' => $user,
             'otp_id' => $getOtp['data']['id'],
             'register_id' => encrypt(rand(1000000000000000000, 999999999999999999)),
@@ -210,12 +210,12 @@ class AuthController extends Controller
             if (!Hash::check($request->password, $user->password)) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Invalid email or password'
+                    'message' => 'Email atau Password tidak valid.'
                 ], 401);
             } else if ($user->email_verified_at === null) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'User not verified, Please check your email to verify'
+                    'message' => 'Email Anda belum terverifikasi.'
                 ], 401);
             }
 
@@ -227,7 +227,7 @@ class AuthController extends Controller
             return response()->json([
                 'token' => $token,
                 'status' => true,
-                'message' => 'Login Successfully',
+                'message' => 'Berhasil Login',
                 'data' => $user
             ], 200)->withCookie($cookie);
         }
@@ -236,7 +236,7 @@ class AuthController extends Controller
             if (!Hash::check($request->password, $delegate->password)) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Invalid email or password'
+                    'message' => 'Email atau Password tidak valid.'
                 ], 401);
             }
 
@@ -248,14 +248,14 @@ class AuthController extends Controller
             return response()->json([
                 'token' => $token,
                 'status' => true,
-                'message' => 'Login Successfully',
+                'message' => 'Berhasil Login',
                 'data' => $delegate
             ], 200)->withCookie($cookie);
         }
 
         return response()->json([
             'status' => false,
-            'message' => 'Invalid email or password'
+            'message' => 'Email atau Password tidak valid.'
         ], 401);
     }
 
@@ -267,7 +267,7 @@ class AuthController extends Controller
         }
         $request->user()->currentAccessToken()->delete();
         Log::info($request->user());
-        return response()->json(['status' => true, 'message' => 'Logged out successfully'], 200);
+        return response()->json(['status' => true, 'message' => 'Berhasil Logout'], 200);
     }
 
     public function storeOtp(Request $request)

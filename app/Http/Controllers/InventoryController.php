@@ -34,7 +34,7 @@ class InventoryController extends Controller
         if (!$bo) {
             return response()->json([
                 'status' => false,
-                'message' => 'User is not authenticated'
+                'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
 
@@ -76,7 +76,7 @@ class InventoryController extends Controller
         if (!$bo) {
             return response()->json([
                 'status' => false,
-                'message' => 'User is not authenticated'
+                'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
 
@@ -152,7 +152,7 @@ class InventoryController extends Controller
             return response()->json(
                 [
                     'status' => false,
-                    'message' => 'Failed Create Barang',
+                    'message' => 'Gagal',
                     'errors' => $errors
                 ],
                 422
@@ -165,7 +165,7 @@ class InventoryController extends Controller
         if ($barangExists) {
             return response()->json([
                 'status' => false,
-                'message' => 'Failed Create Barang',
+                'message' => 'Gagal',
                 'errors' => ['nama_barang' => 'Nama Barang sudah ada di Supplier ini']
             ], 422);
         }
@@ -195,7 +195,7 @@ class InventoryController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Berhasil Menambah Barang'
+            'message' => 'Berhasil'
         ]);
     }
     public function importBarang(Request $request)
@@ -245,7 +245,7 @@ class InventoryController extends Controller
 
             return response()->json([
                 'status' => false,
-                'message' => 'Gagal Import Barang',
+                'message' => 'Gagal Import ',
                 'error' => $th->getMessage()
             ], 500);
         }

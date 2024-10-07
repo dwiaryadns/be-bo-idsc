@@ -16,7 +16,7 @@ class SupplierController extends Controller
         if (!$bo) {
             return response()->json([
                 'status' => false,
-                'message' => 'User is not authenticated'
+                'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
         $suppliers = Supplier::where('bisnis_owner_id', $bo->id)->get();
@@ -33,7 +33,7 @@ class SupplierController extends Controller
         if (!$bo) {
             return response()->json([
                 'status' => false,
-                'message' => 'User is not authenticated'
+                'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
         $supplier = Supplier::where('bisnis_owner_id', $bo->id)
@@ -108,7 +108,7 @@ class SupplierController extends Controller
         if (empty($bo)) {
             return response()->json([
                 'status' => false,
-                'message' => 'User is not authenticated'
+                'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
         $countSupplier = Supplier::count();
@@ -140,7 +140,7 @@ class SupplierController extends Controller
         log_activity("Menambahkan Supplier $request->nama_supplier", 'Supplier', $bo->name, 1);
         return response()->json([
             'status' => true,
-            'message' => 'Success create supplier',
+            'message' => 'Berhasil',
             'data' => $supplier
         ], 200);
     }
@@ -150,7 +150,7 @@ class SupplierController extends Controller
         if (!$bo) {
             return response()->json([
                 'status' => false,
-                'message' => 'User is not authenticated'
+                'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
         $supplier = Supplier::where('bisnis_owner_id', $bo->id)
@@ -159,13 +159,13 @@ class SupplierController extends Controller
         if (!$supplier) {
             return response()->json([
                 'status' => false,
-                'message' => 'Supplier not found'
+                'message' => 'Supplier tidak ditemukan'
             ], 404);
         }
         $supplier->delete();
         return response()->json([
             'status' => true,
-            'message' => 'Success delete supplier'
+            'message' => 'Supplier dihapus.'
         ], 200);
     }
 }

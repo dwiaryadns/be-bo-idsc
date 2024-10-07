@@ -21,7 +21,7 @@ class BoInfoController extends Controller
         if (empty($user)) {
             return response()->json([
                 'status' => false,
-                'message' => 'User is not authenticated'
+                'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
 
@@ -31,14 +31,14 @@ class BoInfoController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'BoInfo record not found',
+                'message' => 'Data tidak ditemukan',
                 'data' => null
             ], 404);
         }
 
         return response()->json([
             'status' => true,
-            'message' => 'success',
+            'message' => 'Berhasil Get Data',
             'data' => $bo_info,
         ]);
     }
@@ -50,10 +50,10 @@ class BoInfoController extends Controller
 
         $user = Auth::guard('bisnis_owner')->user();
         if (empty($user)) {
-            Log::error('User is not authenticated');
+            Log::error('Pengguna tidak terautentikasi.');
             return response()->json([
                 'status' => false,
-                'message' => 'User is not authenticated'
+                'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
 
@@ -79,7 +79,22 @@ class BoInfoController extends Controller
         ];
 
         $messages = [
-            'postal_code.regex' => 'Postal Code must be at least 5 digits',
+            'businessType.required' => 'Tipe Bisnis wajib diisi.',
+            'businessName.required' => 'Nama Bisnis wajib diisi.',
+            'phone.required' => 'Nomor Telepon wajib diisi.',
+            'phone.numeric' => 'Nomor Telepon harus berupa angka.',
+            'mobile.required' => 'Nomor Ponsel wajib diisi.',
+            'mobile.numeric' => 'Nomor Ponsel harus berupa angka.',
+            'address.required' => 'Alamat wajib diisi.',
+            'province.required' => 'Provinsi wajib diisi.',
+            'city.required' => 'Kota wajib diisi.',
+            'subdistrict.required' => 'Kecamatan wajib diisi.',
+            'village.required' => 'Kelurahan/Desa wajib diisi.',
+            'postal_code.required' => 'Kode Pos wajib diisi.',
+            'postal_code.numeric' => 'Kode Pos harus berupa angka.',
+            'postal_code.regex' => 'Kode Pos minimal 5 digit.',
+            'businessEmail.required' => 'Email Bisnis wajib diisi.',
+            'businessEmail.email' => 'Format Email Bisnis tidak valid.',
         ];
 
         $validator = Validator::make($request->all(), $rules, $messages);
@@ -88,7 +103,7 @@ class BoInfoController extends Controller
             $errors = collect($validator->errors())->map(function ($messages) {
                 return $messages[0];
             });
-            return response()->json(['status' => false, 'message' => 'Failed Store Bo Info', 'errors' => $errors], 422);
+            return response()->json(['status' => false, 'message' => 'Gagal', 'errors' => $errors], 422);
         }
 
         Log::info('User authenticated', ['user_id' => $user->id, 'request_data' => $request->all()]);
@@ -121,76 +136,7 @@ class BoInfoController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Completed Data Successfully',
+            'message' => 'Berhasil',
         ]);
     }
-
-    // public function storeBoIfo(Request $request)
-    // {
-    //     Log::info('storeBoIfo called', $request->all());
-
-    //     $validator = Validator::make($request->all(), [
-    //         // 'businessId' => 'required',
-    //         'businessEmail' => 'required|email',
-    //         'businessType' => 'required',
-    //         'businessName' => 'required',
-    //         'phone' => 'required|numeric',
-    //         'mobile' => 'required|numeric',
-    //         'address' => 'required',
-    //         'province' => 'required',
-    //         'city' => 'required',
-    //         'subdistrict' => 'required',
-    //         'village' => 'required',
-    //         'postal_code' => 'required|numeric|regex:/^\d{5,}$/',
-    //     ], [
-    //         // postal code minmal 5 angka
-    //         'postal_code.regex' => 'Postal Code must be at least 5 digits'
-    //     ]);
-    //     if ($validator->fails()) {
-    //         $errors = collect($validator->errors())->map(function ($messages) {
-    //             return $messages[0];
-    //         });
-    //         return response()->json(['status' => false, 'message' => 'Failed Store Bo Info', 'errors' => $errors], 422);
-    //     }
-
-    //     $user = Auth::guard('bisnis_owner')->user();
-    //     if (empty($user)) {
-    //         Log::error('User is not authenticated');
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'User is not authenticated'
-    //         ], 401);
-    //     }
-
-    //     Log::info('User authenticated', ['user_id' => $user->id, 'request_data' => $request->all()]);
-
-    //     $y = date('Y');
-    //     $m = date('m');
-    //     $countBo = BisnisOwner::whereNotNull('email_verified_at')->count();
-    //     BoInfo::updateOrCreate(
-    //         ['id' => $request->id],
-    //         [
-    //             'bisnis_owner_id' => $user->id,
-    //             'businessId' => $y . $m . '000' . $countBo,
-    //             'businessEmail' => $request->businessEmail,
-    //             'businessType' => $request->businessType,
-    //             'businessName' => $request->businessName,
-    //             'phone' => $request->phone,
-    //             'mobile' => $request->mobile,
-    //             'address' => $request->address,
-    //             'province' => $request->province,
-    //             'city' => $request->city,
-    //             'subdistrict' => $request->subdistrict,
-    //             'village' => $request->village,
-    //             'postal_code' => $request->postal_code,
-    //             'status' => 'apply'
-    //         ]
-    //     );
-
-    //     log_activity('Upload Bisnis Owner Info', 'Bisnis Owner Info', $user->name, 1);
-    //     return response()->json([
-    //         'status' => true,
-    //         'message' => 'Completed Data Successfully',
-    //     ]);
-    // }
 }

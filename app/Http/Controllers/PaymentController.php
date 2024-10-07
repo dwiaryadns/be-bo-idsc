@@ -26,6 +26,8 @@ class PaymentController extends Controller
     public function createTransaction(Request $request)
     {
         Log::info($request->amount . ' ' . (int)$request->amount . ' ' . (float)$request->amount);
+        $y = date('Y');
+        $m = date('m');
         $params = [
             'transaction_details' => [
                 'order_id' => uniqid(),
@@ -33,13 +35,13 @@ class PaymentController extends Controller
             ],
             "item_details" => [
                 [
-                    "id" => "ITEM1",
+                    "id" => "IDSC" . $y . $m . rand(100000, 999999),
                     "price" => str_replace('.', '', $request->amount),
                     "quantity" => 1,
                     "name" => $request->type,
                     "brand" => "IdSmartCare",
                     "category" => $request->package,
-                    "merchant_name" => "",
+                    "merchant_name" => "IdsmartCare",
                     "url" => ""
                 ]
             ],

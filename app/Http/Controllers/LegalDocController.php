@@ -157,9 +157,9 @@ class LegalDocController extends Controller
 
         $bo = Auth::guard('bisnis_owner')->user();
         if (empty($bo)) {
-            Log::warning('User is not authenticated');
+            Log::warning('Pengguna tidak terautentikasi.');
             return response()->json([
-                'message' => 'User is not authenticated',
+                'message' => 'Pengguna tidak terautentikasi.',
             ], 401);
         }
 

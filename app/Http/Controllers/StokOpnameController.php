@@ -20,7 +20,7 @@ class StokOpnameController extends Controller
         if (!$bo) {
             return response()->json([
                 'status' => false,
-                'message' => 'User is not authenticated'
+                'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
 
@@ -184,7 +184,7 @@ class StokOpnameController extends Controller
         if (!$bo) {
             return response()->json([
                 'status' => false,
-                'message' => 'User is not authenticated'
+                'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
 
@@ -219,7 +219,9 @@ class StokOpnameController extends Controller
             },
             'barang.supplier' => function ($q) {
                 $q->select('supplier_id', 'nama_supplier');
-            }, 'stok_gudang.warehouse', 'stok_barang.fasyankes_warehouse.fasyankes'
+            },
+            'stok_gudang.warehouse',
+            'stok_barang.fasyankes_warehouse.fasyankes'
         ])->whereHas('barang.supplier', function ($q) use ($bo) {
             $q->where('bisnis_owner_id', $bo->id);
         })->paginate($perPage, ['*'], 'page', $page);
@@ -247,7 +249,7 @@ class StokOpnameController extends Controller
             return response()->json([
                 'status' => false,
                 'errors' => $errors,
-                'message' => 'Gagal Opname'
+                'message' => 'Gagal'
             ], 422);
         }
 
@@ -286,14 +288,13 @@ class StokOpnameController extends Controller
             // log_activity("Melakukan Opname oleh $request->petugas ke ")
             return response()->json([
                 'status' => true,
-                'message' => 'Berhasil Opname',
+                'message' => 'Berhasil',
             ]);
         } catch (\Throwable $th) {
             Log::info($th->getMessage());
             return response()->json([
                 'status' => false,
-                'errors' => 'Terjadi kesalahan saat menyimpan data',
-                'message' => 'Gagal Opname',
+                'message' => 'Gagal',
             ]);
         }
     }
