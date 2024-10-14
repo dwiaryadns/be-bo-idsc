@@ -233,6 +233,12 @@ class LegalDocController extends Controller
                 'siok' => $uploadedFileUrls['siok'] ?? null,
             ]);
 
+            if ($legalDoc && $request->package_plan === 'FREE') {
+                $getFasyankes->update([
+                    'is_active' => 1
+                ]);
+            }
+
             log_activity('Upload Dokumen Legal Fasyankes', "Fasyankes", Auth::guard('bisnis_owner')->user()->name, 1);
             return response()->json([
                 'status' => true,

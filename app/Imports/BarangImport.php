@@ -25,6 +25,11 @@ class BarangImport implements ToModel, WithValidation, SkipsOnError
     }
     public function model(array $row)
     {
+        // Cek apakah baris kosong
+        if (empty(array_filter($row))) {
+            return null; // Jika baris kosong, lewati
+        }
+
         $this->rowNumber++;
         try {
             $bo = Auth::guard('bisnis_owner')->user();
@@ -63,6 +68,7 @@ class BarangImport implements ToModel, WithValidation, SkipsOnError
             return null;
         }
     }
+
 
     public function rules(): array
     {
