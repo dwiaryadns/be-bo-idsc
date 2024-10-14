@@ -204,7 +204,9 @@ class AuthController extends Controller
         }
         $user = BisnisOwner::where('email', $request->email)->first();
 
-        $delegate = DelegateAccess::where('email', $request->email)->first();
+        $delegate = DelegateAccess::where('email', $request->email)
+            ->with('hak_akses')
+            ->first();
 
         if ($user) {
             if (!Hash::check($request->password, $user->password)) {
