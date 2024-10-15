@@ -237,10 +237,15 @@ class StokOpnameController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'barang_id' => 'required',
+            'petugas' => 'required',
             'jml_tercatat' => 'required|numeric',
             'jml_fisik' => 'required|numeric',
             'jml_penyesuaian' => 'required|numeric',
             'keterangan' => 'required|string'
+        ], [
+            'petugas.required' => 'Petugas wajib diisi.',
+            'jml_penyesuaian.required' => 'Jumlah Penyesuaian wajib diisi.',
+            'keterangan.required' => 'Keterangan wajib diisi.',
         ]);
         if ($validator->fails()) {
             $errors = collect($validator->errors())->map(function ($messages) {

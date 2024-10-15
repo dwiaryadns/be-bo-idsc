@@ -36,7 +36,8 @@ class PaymentController extends Controller
             "item_details" => [
                 [
                     "id" => "IDSC" . $y . $m . rand(100000, 999999),
-                    "price" => str_replace('.', '', $request->amount),
+                    // "price" => str_replace('.', '', $request->amount),
+                    "price" => 5000,
                     "quantity" => 1,
                     "name" => $request->type,
                     "brand" => "IdSmartCare",
@@ -51,7 +52,7 @@ class PaymentController extends Controller
                 "email" => $request->email,
                 "phone" => $request->pic_number,
             ],
-            'enabled_payments' => ['bank_transfer'],
+            'enabled_payments' => ['bank_transfer', 'gopay'],
             'expiry' => [
                 'start_time' => date('Y-m-d H:i:s T', strtotime('now')),
                 'unit' => 'minutes',
@@ -73,46 +74,6 @@ class PaymentController extends Controller
         return response()->json(['status' => true, 'message' => 'Success Get Token', 'snap_token' => $snapToken]);
     }
 
-
-    // public function handlePayment($transaction, $notification)
-    // {
-    //     if ($transaction) {
-    //         $paymentType = $notification->payment_type ?? null;
-    //         $acquirer = $notification->acquirer ?? null;
-    //         $fraudStatus = $notification->fraud_status ?? null;
-    //         $expiryTime = $notification->expiry_time ?? null;
-    //         // $qris = $notication->action ?? null;
-    //         // Log::info($qris);
-    //         $urlQr = null;
-    //         if ($acquirer == 'airpay shopee') {
-    //             $urlQr = "https://api.sandbox.midtrans.com/v2/qris/shopeepay/sppq_" . $transaction->transaction_id . "/qr-code";
-    //         } else if ($acquirer == 'gopay') {
-    //             $urlQr = "https://api.sandbox.midtrans.com/v2/qris/" . $transaction->transaction_id . "/qr-code";
-    //         }
-    //         // if ($qris != null) {
-    //         //     $getQrF = $qris['generate-qr-code'];
-    //         //     if ($getQrF) {
-    //         //         $urlQr = $qris['url'];
-    //         //     }
-    //         // }
-    //         $vaNumber = isset($notification->va_numbers[0]) ? $notification->va_numbers[0]->va_number : null;
-    //         $bank = isset($notification->va_numbers[0]) ? $notification->va_numbers[0]->bank : null;
-
-    //         $payment = Payment::updateOrCreate([
-    //             'transaction_id' => $transaction->id,
-    //         ], [
-    //             'payment_type' => $paymentType,
-    //             'acquirer' => $acquirer,
-    //             'fraud_status' => $fraudStatus,
-    //             'expired_at' => $expiryTime,
-    //             'va_number' => $vaNumber,
-    //             'bank' => $bank,
-    //             'url_qr' => $urlQr
-    //         ]);
-
-    //         Log::info('Payment : ' . $payment);
-    //     }
-    // }
     public function handlePayment($transaction, $notification)
     {
         if ($transaction) {
@@ -196,6 +157,7 @@ class PaymentController extends Controller
             } elseif ($transactionStatus == 'settlement') {
                 $transaction->transaction_status = 'success';
             } elseif ($transactionStatus == 'pending') {
+
                 $transaction->transaction_status = 'pending';
             } elseif ($transactionStatus == 'deny') {
                 $transaction->transaction_status = 'failed';
@@ -233,3 +195,43 @@ class PaymentController extends Controller
         }
     }
 }
+
+ // public function handlePayment($transaction, $notification)
+    // {
+    //     if ($transaction) {
+    //         $paymentType = $notification->payment_type ?? null;
+    //         $acquirer = $notification->acquirer ?? null;
+    //         $fraudStatus = $notification->fraud_status ?? null;
+    //         $expiryTime = $notification->expiry_time ?? null;
+    //         // $qris = $notication->action ?? null;
+    //         // Log::info($qris);
+    //         $urlQr = null;
+    //         if ($acquirer == 'airpay shopee') {
+    //             $urlQr = "https://api.sandbox.midtrans.com/v2/qris/shopeepay/sppq_" . $transaction->transaction_id . "/qr-code";
+    //         } else if ($acquirer == 'gopay') {
+    //             $urlQr = "https://api.sandbox.midtrans.com/v2/qris/" . $transaction->transaction_id . "/qr-code";
+    //         }
+    //         // if ($qris != null) {
+    //         //     $getQrF = $qris['generate-qr-code'];
+    //         //     if ($getQrF) {
+    //         //         $urlQr = $qris['url'];
+    //         //     }
+    //         // }
+    //         $vaNumber = isset($notification->va_numbers[0]) ? $notification->va_numbers[0]->va_number : null;
+    //         $bank = isset($notification->va_numbers[0]) ? $notification->va_numbers[0]->bank : null;
+
+    //         $payment = Payment::updateOrCreate([
+    //             'transaction_id' => $transaction->id,
+    //         ], [
+    //             'payment_type' => $paymentType,
+    //             'acquirer' => $acquirer,
+    //             'fraud_status' => $fraudStatus,
+    //             'expired_at' => $expiryTime,
+    //             'va_number' => $vaNumber,
+    //             'bank' => $bank,
+    //             'url_qr' => $urlQr
+    //         ]);
+
+    //         Log::info('Payment : ' . $payment);
+    //     }
+    // }

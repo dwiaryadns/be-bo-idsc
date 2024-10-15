@@ -139,6 +139,25 @@ class DistribusiController extends Controller
             }
 
             foreach ($request->details as $detail) {
+                $stockGudang = StockGudang::where('warehouse_id', $warehouseId)->where('barang_id', $detail['barang_id'])->first();
+
+                // Validasi stok gudang sebelum distribusi
+                if (!$stockGudang || $stockGudang->stok <= 0) {
+                    DB::rollBack();
+                    return response()->json([
+                        'status' => false,
+                        'message' => "Stok barang dengan ID {$detail['barang_id']} di gudang tidak mencukupi atau habis."
+                    ], 422);
+                }
+
+                if ($stockGudang->stok < $detail['jumlah']) {
+                    DB::rollBack();
+                    return response()->json([
+                        'status' => false,
+                        'message' => "Jumlah distribusi barang dengan ID {$detail['barang_id']} melebihi stok gudang yang tersedia."
+                    ], 422);
+                }
+
                 DetailDistribusi::create([
                     'detail_distribusi_id' => 'DDID-' . date('Y') . date('m') . str_pad(DetailDistribusi::count() + 1, 5, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999),
                     'distribusi_id' => $distribusi->distribusi_id,
@@ -147,11 +166,10 @@ class DistribusiController extends Controller
                 ]);
 
                 $stockBarang = StockBarang::where('fasyankes_warehouse_id', $getWfid->wfid)->where('barang_id', $detail['barang_id'])->first();
-                $stockGudang = StockGudang::where('warehouse_id', $warehouseId)->where('barang_id', $detail['barang_id'])->first();
 
                 $stockGudang->stok -= $detail['jumlah'];
                 if (empty($stockBarang)) {
-                    $stockBarang = StockBarang::create([
+                    StockBarang::create([
                         'stok_barang_id' => 'SBID-' . date('Y') . date('m') . str_pad(StockBarang::count() + 1, 5, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999),
                         'fasyankes_warehouse_id' => $getWfid->wfid,
                         'barang_id' => $detail['barang_id'],

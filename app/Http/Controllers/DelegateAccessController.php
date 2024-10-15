@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+
 
 class DelegateAccessController extends Controller
 {
@@ -41,7 +43,14 @@ class DelegateAccessController extends Controller
         $validator = Validator::make($request->all(), [
             'role' => 'required',
             'name' => 'required',
-            'email' => 'required|email|max:255|unique:delegate_accesses|regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
+                Rule::unique('delegate_accesses', 'email'),
+                Rule::unique('bisnis_owners', 'email'), // Validasi unik untuk tabel bisnis_owners
+            ],
             'password' => [
                 'required',
                 'string',
