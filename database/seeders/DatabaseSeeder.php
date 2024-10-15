@@ -208,5 +208,6 @@ class DatabaseSeeder extends Seeder
         $this->call(StockBarangsSeeder::class);
         $this->call(DiskonSeeder::class);
         $this->call(MasterPOASeeder::class);
+        $this->call(NotificationSeeder::class);
     }
 }

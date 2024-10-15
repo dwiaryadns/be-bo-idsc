@@ -10,12 +10,14 @@ use App\Http\Controllers\Core\AccessFasyankesController;
 use App\Http\Controllers\Core\IcdxController;
 use App\Http\Controllers\Core\MasterKfaController;
 use App\Http\Controllers\Core\TransaksiController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DelegateAccessController;
 use App\Http\Controllers\DistribusiController;
 use App\Http\Controllers\FasyankesController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\KeamananAkunController;
 use App\Http\Controllers\LegalDocController;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PembelianController;
 use App\Http\Controllers\PenerimaanController;
@@ -75,12 +77,18 @@ Route::middleware('check.token')->group(function () {
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('/change-twofa', [KeamananAkunController::class, 'verify2FA']);
-
+    Route::prefix('/dashboard')->group(function () {
+        Route::get('/monthly', [DashboardController::class, 'getMonthlyReport']);
+        Route::get('/daily', [DashboardController::class, 'getDailyReport']);
+    });
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::prefix('bo-info')->group(function () {
         Route::get('/', [BoInfoController::class, 'getBoInfo']);
         Route::post('/store', [BoInfoController::class, 'storeBoInfo']);
     });
+    Route::get('/notifications', [NotificationsController::class, 'index']);
+    Route::post('/notifications/update-status', [NotificationsController::class, 'read_notif']);
+
     Route::prefix('warehouses')->group(function () {
         Route::get('/', [WarehouseController::class, 'getWarehouses']);
         Route::post('/store', [WarehouseController::class, 'storeWarehouse']);
