@@ -21,9 +21,19 @@ class PembelianController extends Controller
 {
     public function getPurchase()
     {
+        $bo = Auth::guard('bisnis_owner')->user();
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
+
+        if (!$bo && !$delegate) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Pengguna tidak terautentikasi.'
+            ], 401);
+        }
         $purchase = Pembelian::with('detail_pembelians.barang')
             ->orderBy('created_at', 'DESC')
-            ->whereRelation('warehouse.bisnis_owner', 'id', Auth::guard('bisnis_owner')->user()->id)
+            ->whereRelation('warehouse.bisnis_owner', 'id', $id)
             ->get();
 
         $data = [];
@@ -45,8 +55,18 @@ class PembelianController extends Controller
 
     public function getFasyankesWarehouse()
     {
+        $bo = Auth::guard('bisnis_owner')->user();
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
+
+        if (!$bo && !$delegate) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Pengguna tidak terautentikasi.'
+            ], 401);
+        }
         try {
-            $fasyankesWarehouses = FasyankesWarehouse::with('fasyankes', 'warehouse')->whereRelation('fasyankes.bisnis_owner', 'id', Auth::guard('bisnis_owner')->user()->id)->get();
+            $fasyankesWarehouses = FasyankesWarehouse::with('fasyankes', 'warehouse')->whereRelation('fasyankes.bisnis_owner', 'id', $id)->get();
 
             $data = [];
             foreach ($fasyankesWarehouses as $wf) {
@@ -75,12 +95,23 @@ class PembelianController extends Controller
     public function getBarangSupplier(Request $request)
     {
         $bo = Auth::guard('bisnis_owner')->user();
-        if (!$bo) {
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
+
+        if (!$bo && !$delegate) {
             return response()->json([
                 'status' => false,
                 'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'page' => 'numeric',
+                'per_page' => 'numeric',
+                'search' => ['nullable', 'string', 'regex:/^[^%_\\\\\'\";]*$/'],
+            ]
+        );
 
         $perPage = $request->get('per_page', 10);
         $page = $request->get('page', 1);
@@ -100,8 +131,8 @@ class PembelianController extends Controller
                     });
             });
         }
-        $barangs = $query->with('supplier', 'barang.kfa_poa')->whereHas('supplier', function ($q) use ($bo) {
-            $q->where('bisnis_owner_id', $bo->id);
+        $barangs = $query->with('supplier', 'barang.kfa_poa')->whereHas('supplier', function ($q) use ($id) {
+            $q->where('bisnis_owner_id', $id);
         })->paginate($perPage, ['*'], 'page', $page);
         Log::info($barangs);
 
@@ -114,7 +145,15 @@ class PembelianController extends Controller
 
     public function purchase(Request $request)
     {
-        Log::info($request->all());
+        $bo = Auth::guard('bisnis_owner')->user();
+        $delegate = Auth::guard('delegate_access')->user();
+
+        if (!$bo && !$delegate) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Pengguna tidak terautentikasi.'
+            ], 401);
+        }
         $validator = Validator::make($request->all(), [
             'barang' => 'required',
             'barang.*.barang_id' => 'required|string',
@@ -202,12 +241,14 @@ class PembelianController extends Controller
                 'jumlah' => $jumlah,
                 'harga_satuan' => $hargaSatuan,
                 'total_harga' => $totalHargaBarang,
-                'notes' => $notes
+                'notes' => $notes,
+                'created_at' => now(),
+                'updated_at' => now(),
             ];
         }
         DetailPembelian::insert($detailPembelianData);
 
-        log_activity("Pemesanan Barang untuk $getWarehouse->name", "Pemesanan Barang", Auth::guard('bisnis_owner')->user()->name, 1);
+        log_activity("Pemesanan Barang untuk $getWarehouse->name", "Pemesanan Barang", $bo ? $bo->name : $delegate->name, 1);
         return response()->json([
             'status' => true,
             'message' => 'Berhasil',

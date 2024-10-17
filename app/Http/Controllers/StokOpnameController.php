@@ -17,13 +17,24 @@ class StokOpnameController extends Controller
     public function barang(Request $request)
     {
         $bo = Auth::guard('bisnis_owner')->user();
-        if (!$bo) {
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
+        if (!$bo && !$delegate) {
             return response()->json([
                 'status' => false,
                 'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
-
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'page' => 'numeric',
+                'per_page' => 'numeric',
+                'fasyankes_id' => 'numeric',
+                'warehouse_id' => 'numeric',
+                'search' => ['nullable', 'string', 'regex:/^[^%_\\\\\'\";]*$/'],
+            ]
+        );
         $perPage = $request->get('per_page', 10);
         $page = $request->get('page', 1);
         $search = $request->get('search', '');
@@ -65,8 +76,8 @@ class StokOpnameController extends Controller
                     'fasyankes_warehouse.warehouse' => function ($q) {
                         $q->select('id', 'name');
                     }
-                ])->whereHas('barang.supplier', function ($q) use ($bo) {
-                    $q->where('bisnis_owner_id', $bo->id);
+                ])->whereHas('barang.supplier', function ($q) use ($id) {
+                    $q->where('bisnis_owner_id', $id);
                 })->paginate($perPage, ['*'], 'page', $page);
             } else {
                 $query = StockGudang::query();
@@ -93,8 +104,8 @@ class StokOpnameController extends Controller
                         $q->select('name', 'id');
                     }
 
-                ])->whereHas('barang.supplier', function ($q) use ($bo) {
-                    $q->where('bisnis_owner_id', $bo->id);
+                ])->whereHas('barang.supplier', function ($q) use ($id) {
+                    $q->where('bisnis_owner_id', $id);
                 })->paginate($perPage, ['*'], 'page', $page);
             }
         } else {
@@ -135,8 +146,8 @@ class StokOpnameController extends Controller
                 'fasyankes_warehouse.warehouse' => function ($q) {
                     $q->select('id', 'name');
                 }
-            ])->whereHas('barang.supplier', function ($q) use ($bo) {
-                $q->where('bisnis_owner_id', $bo->id);
+            ])->whereHas('barang.supplier', function ($q) use ($id) {
+                $q->where('bisnis_owner_id', $id);
             })->get();
 
             $stockGudang = $stockGudangQuery->with([
@@ -150,8 +161,8 @@ class StokOpnameController extends Controller
                 'warehouse' => function ($q) {
                     $q->select('name', 'id');
                 }
-            ])->whereHas('barang.supplier', function ($q) use ($bo) {
-                $q->where('bisnis_owner_id', $bo->id);
+            ])->whereHas('barang.supplier', function ($q) use ($id) {
+                $q->where('bisnis_owner_id', $id);
             })->get();
 
             $combined = $stockBarang->merge($stockGudang);
@@ -181,13 +192,25 @@ class StokOpnameController extends Controller
     public function getStokOpname(Request $request)
     {
         $bo = Auth::guard('bisnis_owner')->user();
-        if (!$bo) {
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
+        if (!$bo && !$delegate) {
             return response()->json([
                 'status' => false,
                 'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
 
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'page' => 'numeric',
+                'per_page' => 'numeric',
+                'fasyankes_id' => 'numeric',
+                'warehouse_id' => 'numeric',
+                'search' => ['nullable', 'string', 'regex:/^[^%_\\\\\'\";]*$/'],
+            ]
+        );
         $perPage = $request->get('per_page', 10);
         $page = $request->get('page', 1);
         $search = $request->get('search', '');
@@ -222,8 +245,8 @@ class StokOpnameController extends Controller
             },
             'stok_gudang.warehouse',
             'stok_barang.fasyankes_warehouse.fasyankes'
-        ])->whereHas('barang.supplier', function ($q) use ($bo) {
-            $q->where('bisnis_owner_id', $bo->id);
+        ])->whereHas('barang.supplier', function ($q) use ($id) {
+            $q->where('bisnis_owner_id', $id);
         })->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([
@@ -235,6 +258,15 @@ class StokOpnameController extends Controller
 
     public function storeOpname(Request $request)
     {
+        $bo = Auth::guard('bisnis_owner')->user();
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
+        if (!$bo && !$delegate) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Pengguna tidak terautentikasi.'
+            ], 401);
+        }
         $validator = Validator::make($request->all(), [
             'barang_id' => 'required',
             'petugas' => 'required',
@@ -284,13 +316,11 @@ class StokOpnameController extends Controller
                     'stok' => $request->jml_fisik
                 ]);
             }
-            // log_actvity jika stok barang maka get fasyankes nya jika stok gudang maka get gudang
             if ($request->stok_barang_id) {
-                log_activity("Melakukan Stock Opname oleh $request->petugas ke Fasyankes {$stokBarang->fasyankes_warehouse->fasyankes->name}", 'Stock Opname', Auth::guard('bisnis_owner')->user()->name, 1);
+                log_activity("Melakukan Stock Opname oleh $request->petugas ke Fasyankes {$stokBarang->fasyankes_warehouse->fasyankes->name}", 'Stock Opname', $bo ? $bo->name : $delegate->name, 1);
             } else {
-                log_activity("Melakukan Stock Opname oleh $request->petugas ke Gudang {$stockGudang->warehouse->name}", 'Stock Opname', Auth::guard('bisnis_owner')->user()->name, 1);
+                log_activity("Melakukan Stock Opname oleh $request->petugas ke Gudang {$stockGudang->warehouse->name}", 'Stock Opname', $bo ? $bo->name : $delegate->name, 1);
             }
-            // log_activity("Melakukan Opname oleh $request->petugas ke ")
             return response()->json([
                 'status' => true,
                 'message' => 'Berhasil',

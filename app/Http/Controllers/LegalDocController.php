@@ -37,6 +37,8 @@ class LegalDocController extends Controller
     {
         Log::info('Entering validateFiles method with type: ' . $type);
         $maxFileSize = 2000;
+
+        // Aturan dasar untuk semua jenis
         $rules = [
             'iso' => 'nullable|file|mimes:pdf|max:' . $maxFileSize,
             'password' => [
@@ -51,35 +53,42 @@ class LegalDocController extends Controller
                 'password.regex' => 'Password must contain at least 1 Uppercase Word, 1 Special Character, and 1 Number',
             ]
         ];
+
+        // Cek apakah ada request ID
+        $isUpdating = $request->has('id');
+
+        // Aturan validasi untuk setiap tipe dokumen berdasarkan $type
+        if ($type === 'Perusahaan') {
+            $rules = array_merge($rules, [
+                'ktp' => ($isUpdating ? 'nullable' : 'required') . '|file|mimes:pdf|max:' . $maxFileSize,
+                'npwp' => ($isUpdating ? 'nullable' : 'required') . '|file|mimes:pdf|max:' . $maxFileSize,
+                'akta' => ($isUpdating ? 'nullable' : 'required') . '|file|mimes:pdf|max:' . $maxFileSize,
+                'sk_kemenkumham' => ($isUpdating ? 'nullable' : 'required') . '|file|mimes:pdf|max:' . $maxFileSize,
+                'nib' => ($isUpdating ? 'nullable' : 'required') . '|file|mimes:pdf|max:' . $maxFileSize,
+            ]);
+        } elseif ($type === 'Apotek') {
+            $rules = array_merge($rules, [
+                'sia' => ($isUpdating ? 'nullable' : 'required') . '|file|mimes:pdf|max:' . $maxFileSize,
+                'sipa' => ($isUpdating ? 'nullable' : 'required') . '|file|mimes:pdf|max:' . $maxFileSize,
+            ]);
+        } elseif ($type === 'Klinik') {
+            $rules = array_merge($rules, [
+                'simk' => ($isUpdating ? 'nullable' : 'required') . '|file|mimes:pdf|max:' . $maxFileSize,
+                'siok' => ($isUpdating ? 'nullable' : 'required') . '|file|mimes:pdf|max:' . $maxFileSize,
+            ]);
+        } elseif ($type === 'Perorangan') {
+            $rules = array_merge($rules, [
+                'ktp' => ($isUpdating ? 'nullable' : 'required') . '|file|mimes:pdf|max:' . $maxFileSize,
+                'npwp' => ($isUpdating ? 'nullable' : 'required') . '|file|mimes:pdf|max:' . $maxFileSize,
+            ]);
+        }
+
+        // Pesan khusus untuk regex password
         $messages = [
             'password.regex' => 'Password must contain at least 1 uppercase letter, 1 special character, and 1 number.',
         ];
 
-        if ($type === 'Perusahaan') {
-            $rules = array_merge($rules, [
-                'ktp' => 'required|file|mimes:pdf|max:' . $maxFileSize,
-                'npwp' => 'required|file|mimes:pdf|max:' . $maxFileSize,
-                'akta' => 'required|file|mimes:pdf|max:' . $maxFileSize,
-                'sk_kemenkumham' => 'required|file|mimes:pdf|max:' . $maxFileSize,
-                'nib' => 'required|file|mimes:pdf|max:' . $maxFileSize,
-            ]);
-        } elseif ($type === 'Apotek') {
-            $rules = array_merge($rules, [
-                'sia' => 'required|file|mimes:pdf|max:' . $maxFileSize,
-                'sipa' => 'required|file|mimes:pdf|max:' . $maxFileSize,
-            ]);
-        } elseif ($type === 'Klinik') {
-            $rules = array_merge($rules, [
-                'simk' => 'required|file|mimes:pdf|max:' . $maxFileSize,
-                'siok' => 'required|file|mimes:pdf|max:' . $maxFileSize,
-            ]);
-        } elseif ($type === 'Perorangan') {
-            $rules = array_merge($rules, [
-                'ktp' => 'required|file|mimes:pdf|max:' . $maxFileSize,
-                'npwp' => 'required|file|mimes:pdf|max:' . $maxFileSize,
-            ]);
-        }
-
+        // Proses validasi
         $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
@@ -149,6 +158,7 @@ class LegalDocController extends Controller
     public function upload(Request $request)
     {
         Log::info('Entering upload method');
+        Log::info($request->all());
         $validation = $this->validateFiles($request, $request->type);
         if ($validation instanceof \Illuminate\Http\JsonResponse) {
             Log::info('Validation errors in upload method');
@@ -169,21 +179,24 @@ class LegalDocController extends Controller
             Log::info('Calling uploadAndEncryptFiles method');
             $uploadedFileUrls = $this->uploadAndEncryptFiles($request, $name);
 
-            Log::info($uploadedFileUrls);
+            // Dapatkan data legal document yang sudah ada, jika ada
+            $existingLegalDoc = LegalDocBo::where('bisnis_owner_id', $bo->id)->first();
+
+            // Update atau buat legal document baru, gunakan nilai lama jika tidak ada file baru yang di-upload
             $legalDoc = LegalDocBo::updateOrCreate([
                 'id' => $request->id
             ], [
                 'bisnis_owner_id' => $bo->id,
-                'ktp' => $uploadedFileUrls['ktp'] ?? null,
-                'akta' => $uploadedFileUrls['akta'] ?? null,
-                'sk_kemenkumham' => $uploadedFileUrls['sk_kemenkumham'] ?? null,
-                'npwp' => $uploadedFileUrls['npwp'] ?? null,
-                'nib' => $uploadedFileUrls['nib'] ?? null,
-                'iso' => $uploadedFileUrls['iso'] ?? null,
+                'ktp' => $uploadedFileUrls['ktp'] ?? $existingLegalDoc->ktp ?? null,
+                'akta' => $uploadedFileUrls['akta'] ?? $existingLegalDoc->akta ?? null,
+                'sk_kemenkumham' => $uploadedFileUrls['sk_kemenkumham'] ?? $existingLegalDoc->sk_kemenkumham ?? null,
+                'npwp' => $uploadedFileUrls['npwp'] ?? $existingLegalDoc->npwp ?? null,
+                'nib' => $uploadedFileUrls['nib'] ?? $existingLegalDoc->nib ?? null,
+                'iso' => $uploadedFileUrls['iso'] ?? $existingLegalDoc->iso ?? null,
                 'status' => 'apply',
             ]);
 
-            Log::info('Legal document created successfully');
+            Log::info('Legal document created/updated successfully');
             log_activity("Upload Dokumen Legal Bisnis Owner", "Dokumen Legal", Auth::guard('bisnis_owner')->user()->name, 1);
             return response()->json([
                 'status' => true,

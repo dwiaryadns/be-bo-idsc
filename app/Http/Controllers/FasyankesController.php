@@ -21,8 +21,16 @@ class FasyankesController extends Controller
     public function getFasyankes()
     {
         $bo = Auth::guard('bisnis_owner')->user();
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
+        if (!$bo && !$delegate) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Pengguna tidak terautentikasi.'
+            ], 401);
+        }
         $fasyankes = Fasyankes::with('warehouse', 'legal_doc', 'subscription_plan')
-            ->where('bisnis_owner_id', $bo->id)
+            ->where('bisnis_owner_id', $id)
             ->get();
 
         if (!$fasyankes) {

@@ -80,6 +80,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::prefix('/dashboard')->group(function () {
         Route::get('/monthly', [DashboardController::class, 'getMonthlyReport']);
         Route::get('/daily', [DashboardController::class, 'getDailyReport']);
+        Route::get('/stok-gudang', [DashboardController::class, 'stokGudangReport']);
+        Route::get('/stok-fasyankes', [DashboardController::class, 'stokFasyankesReport']);
     });
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::prefix('bo-info')->group(function () {

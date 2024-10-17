@@ -31,7 +31,10 @@ class InventoryController extends Controller
     public function getBarang(Request $request)
     {
         $bo = Auth::guard('bisnis_owner')->user();
-        if (!$bo) {
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
+
+        if (!$bo && !$delegate) {
             return response()->json([
                 'status' => false,
                 'message' => 'Pengguna tidak terautentikasi.'
@@ -59,8 +62,8 @@ class InventoryController extends Controller
                 $q->select('supplier_id', 'nama_supplier');
             },
             'kategori_barang',
-        ])->whereHas('supplier', function ($q) use ($bo) {
-            $q->where('bisnis_owner_id', $bo->id);
+        ])->whereHas('supplier', function ($q) use ($id) {
+            $q->where('bisnis_owner_id', $id);
         })->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([
@@ -73,13 +76,15 @@ class InventoryController extends Controller
     public function getStockBarang(Request $request)
     {
         $bo = Auth::guard('bisnis_owner')->user();
-        if (!$bo) {
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
+
+        if (!$bo && !$delegate) {
             return response()->json([
                 'status' => false,
                 'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
-
         $perPage = $request->get('per_page', 10);
         $page = $request->get('page', 1);
         $search = $request->get('search', '');
@@ -112,8 +117,8 @@ class InventoryController extends Controller
             'fasyankes_warehouse.fasyankes' => function ($q) {
                 $q->select('fasyankesId', 'name');
             }
-        ])->whereHas('barang.supplier', function ($q) use ($bo) {
-            $q->where('bisnis_owner_id', $bo->id);
+        ])->whereHas('barang.supplier', function ($q) use ($id) {
+            $q->where('bisnis_owner_id', $id);
         })->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([
@@ -125,6 +130,16 @@ class InventoryController extends Controller
 
     public function storeBarang(Request $request)
     {
+        $bo = Auth::guard('bisnis_owner')->user();
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
+
+        if (!$bo && !$delegate) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Pengguna tidak terautentikasi.'
+            ], 401);
+        }
         $validator = Validator::make($request->all(), [
             'nama_barang' => 'required',
             'kategori_id' => 'required',
@@ -191,7 +206,7 @@ class InventoryController extends Controller
             'harga' => str_replace('Rp', '', $harga_beli),
         ]);
 
-        log_activity("Menambahkan Barang Pada Daftar Produk ", "Daftar Produk", Auth::guard('bisnis_owner')->user()->name, 1);
+        log_activity("Menambahkan Barang Pada Daftar Produk ", "Daftar Produk", $bo ? $bo->name : $delegate->name, 1);
 
         return response()->json([
             'status' => true,
@@ -200,6 +215,16 @@ class InventoryController extends Controller
     }
     public function importBarang(Request $request)
     {
+        $bo = Auth::guard('bisnis_owner')->user();
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
+
+        if (!$bo && !$delegate) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Pengguna tidak terautentikasi.'
+            ], 401);
+        }
         $request->validate([
             'file' => 'required|mimes:xls,xlsx'
         ], [
@@ -219,7 +244,7 @@ class InventoryController extends Controller
                 Log::warning('Import Barang: Errors encountered', $errors);
             }
 
-            log_activity("Import Barang Pada Daftar Produk", "Daftar Produk", Auth::guard('bisnis_owner')->user()->name, 1);
+            log_activity("Import Barang Pada Daftar Produk", "Daftar Produk", $bo ? $bo->name : $delegate->name, 1);
 
             return response()->json([
                 'status' => true,

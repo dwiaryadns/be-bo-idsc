@@ -13,13 +13,16 @@ class SupplierController extends Controller
     public function getSupplier()
     {
         $bo = Auth::guard('bisnis_owner')->user();
-        if (!$bo) {
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
+
+        if (!$bo && !$delegate) {
             return response()->json([
                 'status' => false,
                 'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
-        $suppliers = Supplier::where('bisnis_owner_id', $bo->id)->get();
+        $suppliers = Supplier::where('bisnis_owner_id', $id)->get();
         return response()->json([
             'status' => true,
             'message' => 'Success get supplier',
@@ -30,13 +33,16 @@ class SupplierController extends Controller
     public function showSupplier($id)
     {
         $bo = Auth::guard('bisnis_owner')->user();
-        if (!$bo) {
+        $delegate = Auth::guard('delegate_access')->user();
+        $idAuth = $bo ? $bo->id : $delegate->bisnis_owner_id;
+
+        if (!$bo && !$delegate) {
             return response()->json([
                 'status' => false,
                 'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
-        $supplier = Supplier::where('bisnis_owner_id', $bo->id)
+        $supplier = Supplier::where('bisnis_owner_id', $idAuth)
             ->where('supplier_id', $id)
             ->first();
         if (!$supplier) {
@@ -102,10 +108,13 @@ class SupplierController extends Controller
             $errors = collect($validator->errors())->map(function ($messages) {
                 return $messages[0];
             });
-            return response()->json(['status' => false, 'errors' => $errors], 422);
+            return response()->json(['status' => false, 'errors' => $errors,'message'=> 'Gagal'], 422);
         }
         $bo = Auth::guard('bisnis_owner')->user();
-        if (empty($bo)) {
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
+
+        if (!$bo && !$delegate) {
             return response()->json([
                 'status' => false,
                 'message' => 'Pengguna tidak terautentikasi.'
@@ -116,7 +125,7 @@ class SupplierController extends Controller
         $supplier = Supplier::updateOrCreate([
             'supplier_id' => $request->supplier_id,
         ], [
-            'bisnis_owner_id' => $bo->id,
+            'bisnis_owner_id' => $id,
             'supplier_id' => $request->supplier_id ?? 'SUPPID-' . date('Y') . date('m') . str_pad($countSupplier + 1, 5, "0", STR_PAD_LEFT) . '-' . rand(1000, 9999),
             'nama_supplier' => $request->nama_supplier,
             'alamat' => $request->alamat,
@@ -137,7 +146,7 @@ class SupplierController extends Controller
             'end_pks_date' => $request->end_pks_date,
             'catatan_tambahan' => $request->catatan_tambahan,
         ]);
-        log_activity("Menambahkan Supplier $request->nama_supplier", 'Supplier', $bo->name, 1);
+        log_activity("Menambahkan Supplier $request->nama_supplier", 'Supplier', $bo ? $bo->name : $delegate->name, 1);
         return response()->json([
             'status' => true,
             'message' => 'Berhasil',
@@ -147,13 +156,16 @@ class SupplierController extends Controller
     public function deleteSupplier($supplierId)
     {
         $bo = Auth::guard('bisnis_owner')->user();
-        if (!$bo) {
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
+
+        if (!$bo && !$delegate) {
             return response()->json([
                 'status' => false,
                 'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
-        $supplier = Supplier::where('bisnis_owner_id', $bo->id)
+        $supplier = Supplier::where('bisnis_owner_id', $id)
             ->where('supplier_id', $supplierId)
             ->first();
         if (!$supplier) {

@@ -19,15 +19,18 @@ class DistribusiController extends Controller
     public function getDistribusi()
     {
         $bo = Auth::guard('bisnis_owner')->user();
-        if (!$bo) {
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
+
+        if (!$bo && !$delegate) {
             return response()->json([
                 'status' => false,
-                'message' => 'Unauthorized'
+                'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
         $distribusis = Distribusi::with('warehouse', 'fasyankes', 'detail_distribusi')
-            ->whereHas('warehouse', function ($q) use ($bo) {
-                $q->where('bisnis_owner_id', $bo->id);
+            ->whereHas('warehouse', function ($q) use ($id) {
+                $q->where('bisnis_owner_id', $id);
             })->get();
 
         $data = [];
@@ -49,12 +52,24 @@ class DistribusiController extends Controller
     public function getBarangGudang(Request $request)
     {
         $bo = Auth::guard('bisnis_owner')->user();
-        if (!$bo) {
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
+
+        if (!$bo && !$delegate) {
             return response()->json([
                 'status' => false,
-                'message' => 'Pengguna tidak terautentikasi',
+                'message' => 'Pengguna tidak terautentikasi.'
             ], 401);
         }
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'page' => 'numeric',
+                'per_page' => 'numeric',
+                'warehouse_id' => 'numeric',
+                'search' => ['nullable', 'string', 'regex:/^[^%_\\\\\'\";]*$/'],
+            ]
+        );
 
         $perPage = $request->get('per_page', 10);
         $page = $request->get('page', 1);
@@ -76,8 +91,8 @@ class DistribusiController extends Controller
             $query->where('warehouse_id', $warehouseId);
         }
 
-        $query->where('isJual', 1)->whereHas('warehouse', function ($q) use ($bo) {
-            $q->where('bisnis_owner_id', $bo->id);
+        $query->where('isJual', 1)->whereHas('warehouse', function ($q) use ($id) {
+            $q->where('bisnis_owner_id', $id);
         });
 
         $barangs = $query->with('barang', 'warehouse')
@@ -94,6 +109,16 @@ class DistribusiController extends Controller
 
     public function store(Request $request)
     {
+        $bo = Auth::guard('bisnis_owner')->user();
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
+
+        if (!$bo && !$delegate) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Pengguna tidak terautentikasi.'
+            ], 401);
+        }
         $validator = Validator::make($request->all(), [
             'warehouse_id' => 'required|exists:warehouses,id',
             'fasyankes_id' => 'required|exists:fasyankes,fasyankesId',
@@ -183,7 +208,7 @@ class DistribusiController extends Controller
             }
 
             DB::commit();
-            log_activity("Distribusi dari {$getWfid->warehouse->name} ke {$getWfid->fasyankes->name}", "Distribusi Barang", Auth::guard('bisnis_owner')->user()->name, 1);
+            log_activity("Distribusi dari {$getWfid->warehouse->name} ke {$getWfid->fasyankes->name}", "Distribusi Barang", $bo ? $bo->name : $delegate->name, 1);
             return response()->json([
                 'status' => true,
                 'message' => 'Berhasil',

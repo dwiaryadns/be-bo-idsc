@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
+use App\Models\DelegateAccess;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -67,14 +68,18 @@ class ActivityLogController extends Controller
             $query->whereMonth('activity_at', date('m'));
         }
 
+        $dataAccess = DelegateAccess::where('bisnis_owner_id', $bo->id)->get()->pluck('name');
+        Log::info($dataAccess);
         $logs = $query->where('activity_by', $bo->name)
+            ->orWhereIn('activity_by', $dataAccess)
             ->orderBy('activity_at', 'desc')
             ->paginate($perPage, ['*'], 'page', $page);
+        Log::info($logs);
 
         return response()->json([
             'status' => true,
             'message' => 'Berhasil Get Data',
-            'data' => $logs
+            'data' => $logs,
         ], 200);
     }
 }

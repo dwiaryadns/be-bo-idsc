@@ -22,16 +22,19 @@ class PenerimaanController extends Controller
     public function penerimaan()
     {
         $bo = Auth::guard('bisnis_owner')->user();
-        if (!$bo) {
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
+
+        if (!$bo && !$delegate) {
             return response()->json([
                 'status' => false,
                 'message' => 'Pengguna tidak terautentikasi.'
-            ]);
+            ], 401);
         }
 
         $penerimaan = PenerimaanBarang::with('good_receipt_notes', 'pembelian', 'detailPending')
             ->orderBy('created_at', 'DESC')
-            ->whereRelation('warehouse.bisnis_owner', 'id', Auth::guard('bisnis_owner')->user()->id)
+            ->whereRelation('warehouse.bisnis_owner', 'id', $id)
             ->get();
 
         $data = [];
@@ -55,6 +58,16 @@ class PenerimaanController extends Controller
 
     public function showByPoId(Request $request)
     {
+        $bo = Auth::guard('bisnis_owner')->user();
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
+
+        if (!$bo && !$delegate) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Pengguna tidak terautentikasi.'
+            ], 401);
+        }
         if (!$request->has('po_id') || $request->po_id == null || $request->po_id == '') {
             return response()->json([
                 'status' => false,
@@ -62,7 +75,7 @@ class PenerimaanController extends Controller
             ], 400);
         }
         $poId = strtoupper($request->po_id);
-        $pembelian = Pembelian::whereRelation('warehouse.bisnis_owner', 'id', Auth::guard('bisnis_owner')->user()->id)
+        $pembelian = Pembelian::whereRelation('warehouse.bisnis_owner', 'id', $id)
             ->where('po_id', $poId)
             ->first();
 
@@ -105,6 +118,15 @@ class PenerimaanController extends Controller
 
     public function save(Request $request)
     {
+        $bo = Auth::guard('bisnis_owner')->user();
+        $delegate = Auth::guard('delegate_access')->user();
+
+        if (!$bo && !$delegate) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Pengguna tidak terautentikasi.'
+            ], 401);
+        }
         $validator = Validator::make($request->all(), [
             'penerima' => 'required|string|max:255',
             'pengirim' => 'required|string|max:255',
@@ -190,6 +212,8 @@ class PenerimaanController extends Controller
                     'jml_kurang' => $barang['jml_kekurangan'],
                     'kondisi' => $barang['kondisi'],
                     'status' => $status,
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ];
             }
             foreach ($stockBarang as $barang) {
@@ -227,7 +251,7 @@ class PenerimaanController extends Controller
             $penerimaan->update(['status' => $isPending ? 'Pending' : 'Received']);
             DB::commit();
             GenerateGRNLetter::dispatch($grnData);
-            log_activity("Penerimaan Barang untuk $getWarehouse->name", "Penerimaan Barang", Auth::guard('bisnis_owner')->user()->name, 1);
+            log_activity("Penerimaan Barang untuk $getWarehouse->name", "Penerimaan Barang", $bo ? $bo->name : $delegate->name, 1);
             return response()->json([
                 'status' => true,
                 'message' => 'Berhasil',

@@ -50,9 +50,10 @@ class WarehouseController extends Controller
             return response()->json(['status' => false, 'message' => 'Gagal Menambahkan Gudang', 'errors' => $errors], 422);
         }
 
-        $user = Auth::guard('bisnis_owner')->user();
-        if (empty($user)) {
-            Log::error('Pengguna tidak terautentikasi.');
+        $bo = Auth::guard('bisnis_owner')->user();
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
+        if (!$bo && !$delegate) {
             return response()->json([
                 'status' => false,
                 'message' => 'Pengguna tidak terautentikasi.'
@@ -60,14 +61,14 @@ class WarehouseController extends Controller
         }
         $warehouse = Warehouse::create(
             [
-                'bisnis_owner_id' => $user->id,
+                'bisnis_owner_id' => $id,
                 'name' => $request->name,
                 'address' => $request->address,
                 'pic' => $request->pic,
                 'contact' => $request->contact,
             ]
         );
-        log_activity("Menambahkan Gudang $request->name", 'Gudang', $user->name, 1);
+        log_activity("Menambahkan Gudang $request->name", 'Gudang', $bo ? $bo->name :  $delegate->name, 1);
         if ($warehouse) {
             return response()->json([
                 'status' => true,
@@ -79,7 +80,10 @@ class WarehouseController extends Controller
     public function stockGudang(Request $request)
     {
         $bo = Auth::guard('bisnis_owner')->user();
-        $countWh = Warehouse::where('bisnis_owner_id', $bo->id)->get();
+        $delegate = Auth::guard('delegate_access')->user();
+        $id = $bo ? $bo->id : $delegate->bisnis_owner_id;
+
+        $countWh = Warehouse::where('bisnis_owner_id', $id)->get();
         if ($countWh->count() === 1) {
             $whId = $countWh[0]->id;
         } else {
@@ -99,12 +103,17 @@ class WarehouseController extends Controller
             }
             $whId = $request->get('warehouse_id');
         }
-
-
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'page' => 'numeric',
+                'per_page' => 'numeric',
+                'search' => ['nullable', 'string', 'regex:/^[^%_\\\\\'\";]*$/'],
+            ]
+        );
         $perPage = $request->get('per_page', 10);
         $page = $request->get('page', 1);
         $search = $request->get('search', '');
-
 
         $query = StockGudang::query();
 
